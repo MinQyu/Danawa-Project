@@ -52,7 +52,7 @@ def Search_list():
 
 
 
-image=PhotoImage(file="C:\강의\캡스톤 디자인 프로젝트\다나와.png")
+image=PhotoImage(file="logo.png")
 font = tkinter.font.Font(family="맑은 고딕", size=15)
 
 lbl = Label(window, image=image, bd=0)
