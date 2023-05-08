@@ -15,6 +15,7 @@ chrome_options.add_experimental_option("detach", True)
 driver = webdriver.Chrome(options=chrome_options)
 driver.get("https://danawa.com")
 time.sleep(2)
+
 '''
 window = Tk()
 window.title("다나와 최저가 검색")
@@ -63,6 +64,7 @@ class SampleApp(tk.Tk):
 
 class StartPage(tk.Frame):
     def __init__(self, master):
+        image = tk.PhotoImage(file="logo.png")
         def Search(): #버튼 누를시 실행할 함수
             검색어 = txt.get()
             searchBox = driver.find_element(By.CLASS_NAME,"search__input")
@@ -74,7 +76,9 @@ class StartPage(tk.Frame):
             Search_list()
 
         tk.Frame.__init__(self, master)
-        tk.Label(self, image = PhotoImage(file="logo.png")).pack(pady=10)
+        label = tk.Label(self, image = image)
+        label.image = image
+        label.pack(pady=10)
         txt = tk.Entry(self, relief="groove", insertbackground="green", highlightthickness=2, highlightcolor="lightgreen")
         txt.pack(fill=X, padx=10)
         tk.Button(self, text="검색", cursor="hand2", command=Search).pack(pady=10)
