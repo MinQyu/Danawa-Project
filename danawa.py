@@ -9,41 +9,12 @@ import tkinter.font
 import time
 
 
-
 chrome_options = Options()
 chrome_options.add_experimental_option("detach", True)
 driver = webdriver.Chrome(options=chrome_options)
 driver.get("https://danawa.com")
 time.sleep(2)
 
-'''
-window = Tk()
-window.title("다나와 최저가 검색")
-window.geometry("1280x720+100+100")
-window.configure(bg='white')
-window.resizable(False, False)
-'''
-
-
-
-'''
-image=PhotoImage(file="logo.png")
-font = tkinter.font.Font(family="맑은 고딕", size=15)
-
-
-lbl = Label(window, image=image, bd=0)
-lbl.pack(pady=10)
-
-txt = Entry(window, relief="groove", insertbackground="green", highlightthickness=2, highlightcolor="lightgreen", font=font)
-txt.pack(fill=X, padx=10)
-
-btn = Button(window, text="검색", font=font, cursor="hand2")
-btn.config(command=Search)
-btn.pack(pady=10)
-
-
-window.mainloop()
-'''
 
 class App(tk.Tk):
     def __init__(self):
