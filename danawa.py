@@ -35,9 +35,10 @@ class App(tk.Tk):
 
 class StartPage(tk.Frame):
     def __init__(self, master):
-        image = tk.PhotoImage(file="logo.png")
+        logo = tk.PhotoImage(file="logo.png")
+        icon = tk.PhotoImage(file="icon.png")
         font = tk.font.Font(family="맑은 고딕", size=15)
-        def Search(): #버튼 누를시 실행할 함수
+        def Search(event): #버튼 누를시 실행할 함수
             검색어 = txt.get()
             searchBox = driver.find_element(By.CLASS_NAME,"search__input")
             searchBox.click()
@@ -50,13 +51,15 @@ class StartPage(tk.Frame):
 
         tk.Frame.__init__(self, master)
         tk.Frame.configure(self,bg="white", width=1280)
-        label = tk.Label(self, image = image, bd=0, bg="white")
-        label.image = image # 가비지 컬렉터 삭제 방지
+        label = tk.Label(self, image=logo, bd=0, bg="white")
+        label.image = logo #가비지 컬렉터 삭제 방지
         label.pack(fill=X, pady=10)
         txt = tk.Entry(self, relief="groove", insertbackground="green", highlightthickness=2, highlightcolor="lightgreen", font=font)
-        txt.pack(fill=X, padx=10)
-        tk.Button(self, text="검색", cursor="hand2", command=Search).pack(pady=10)
-        tk.Button(self, text="Go to page two", command=lambda: master.switch_frame(PageTwo)).pack()
+        txt.bind("<Return>",Search)
+        txt.pack(expand=1, side="left", fill=X, padx=5)
+        btn = tk.Button(self, image=icon, bd=0, bg="white", relief="solid", repeatinterval=1000, cursor="hand2", command=Search, font=font)
+        btn.image = icon #가비지 컬렉터 삭제 방지
+        btn.pack(side="right",padx=5)
 
 def Search_list():
     soup = BeautifulSoup(driver.page_source, 'html.parser')
