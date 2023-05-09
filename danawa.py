@@ -53,6 +53,7 @@ class StartPage(tk.Frame):
                 searchBox.send_keys(검색어)
                 search = driver.find_element(By.CLASS_NAME, "search__submit")
                 search.click()
+                Search_list()
                 master.switch_frame(PageOne) #페이지 전환
             else:
                 msgbox.showinfo("알림", "검색어를 입력해주세요")
@@ -68,31 +69,33 @@ class StartPage(tk.Frame):
         btn.image = icon #가비지 컬렉터 삭제 방지
         btn.pack(side="right",padx=5)
 
+product_list=[]
+def Search_list():
+    soup = BeautifulSoup(driver.page_source, 'html.parser')
+    goods_list = soup.select('div.main_prodlist.main_prodlist_list > ul > li')
+    for v in goods_list:
+        i=0
+        new_text = ""
+        if v.find('div', class_='prod_main_info'):
+            name = v.select_one('p.prod_name > a').text.strip()
+            prod_info = ''  # 제품스펙
+            for s in v.select('div.spec_list > a'):
+                prod_info += s.text + '/'
+            product_link = v.select_one('p.prod_name > a')['href']
+            img_link = v.select_one('div.thumb_image > a > img').get('data-original')
+        if img_link == None:
+            img_link = v.select_one('div.thumb_image > a > img').get('src')
+            new_text = new_text + "\n" + "제품명:" + name + "\n" + "제품 정보:" + prod_info + "\n" + "이미지 링크:" + img_link + "\n" + "제품 링크:" + product_link + "\n"
+        product_list.insert(i, new_text)
+        i+=1
 
 class PageOne(tk.Frame):
     def __init__(self, master):
-        def Search_list():
-            soup = BeautifulSoup(driver.page_source, 'html.parser')
-            goods_list = soup.select('div.main_prodlist.main_prodlist_list > ul > li')
-            for v in goods_list:
-                new_text = ""
-                if v.find('div', class_='prod_main_info'):
-                    name = v.select_one('p.prod_name > a').text.strip()
-                    prod_info = ''  # 제품스펙
-                    for s in v.select('div.spec_list > a'):
-                        prod_info += s.text + '/'
-                    product_link = v.select_one('p.prod_name > a')['href']
-                    img_link = v.select_one('div.thumb_image > a > img').get('data-original')
-                if img_link == None:
-                    img_link = v.select_one('div.thumb_image > a > img').get('src')
-                    new_text = new_text + "\n" + "제품명:" + name + "\n" + "제품 정보:" + prod_info + "\n" + "이미지 링크:" + img_link + "\n" + "제품 링크:" + product_link + "\n"
-                print(new_text)
         tk.Frame.__init__(self, master)
         tk.Frame.configure(self,bg='white')
-        Search_list
-        tk.Label(self, text="Page one", font=('Helvetica', 18, "bold")).pack(side="top", fill="x", pady=5)
+        tk.Label(self, text=product_list[0], font=('Helvetica', 18, "bold")).pack(expand=1, side="top", fill="x", pady=5)
         tk.Button(self, text="Go back to start page", command=lambda: master.switch_frame(StartPage)).pack()
-
+        print(product_list[0])
 class PageTwo(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
