@@ -45,7 +45,7 @@ btn.pack(pady=10)
 window.mainloop()
 '''
 
-class SampleApp(tk.Tk):
+class App(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
         self.title("다나와 최저가 검색")
@@ -60,11 +60,12 @@ class SampleApp(tk.Tk):
         if self._frame is not None:
             self._frame.destroy()
         self._frame = new_frame
-        self._frame.pack()
+        self._frame.pack(fill=BOTH)
 
 class StartPage(tk.Frame):
     def __init__(self, master):
         image = tk.PhotoImage(file="logo.png")
+        font = tk.font.Font(family="맑은 고딕", size=15)
         def Search(): #버튼 누를시 실행할 함수
             검색어 = txt.get()
             searchBox = driver.find_element(By.CLASS_NAME,"search__input")
@@ -76,17 +77,15 @@ class StartPage(tk.Frame):
             Search_list()
 
         tk.Frame.__init__(self, master)
-        label = tk.Label(self, image = image)
-        label.image = image
-        label.pack(pady=10)
-        txt = tk.Entry(self, relief="groove", insertbackground="green", highlightthickness=2, highlightcolor="lightgreen")
+        tk.Frame.configure(self,bg="white", width=1280)
+        label = tk.Label(self, image = image, bd=0, bg="white")
+        label.image = image # 가비지 컬렉터 삭제 방지
+        label.pack(fill=X, pady=10)
+        txt = tk.Entry(self, relief="groove", insertbackground="green", highlightthickness=2, highlightcolor="lightgreen", font=font)
         txt.pack(fill=X, padx=10)
         tk.Button(self, text="검색", cursor="hand2", command=Search).pack(pady=10)
-        tk.Button(self, text="Go to page one",
-                  command=lambda: master.switch_frame(PageOne)).pack()
-        tk.Button(self, text="Go to page two",
-                  command=lambda: master.switch_frame(PageTwo)).pack()
-
+        tk.Button(self, text="Go to page one", command=lambda: master.switch_frame(PageOne)).pack()
+        tk.Button(self, text="Go to page two", command=lambda: master.switch_frame(PageTwo)).pack()
 
 def Search_list():
     soup = BeautifulSoup(driver.page_source, 'html.parser')
@@ -108,29 +107,20 @@ def Search_list():
 class PageOne(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
-        tk.Frame.configure(self,bg='blue')
+        tk.Frame.configure(self,bg='white')
         tk.Label(self, text="Page one", font=('Helvetica', 18, "bold")).pack(side="top", fill="x", pady=5)
-        tk.Button(self, text="Go back to start page",
-                  command=lambda: master.switch_frame(StartPage)).pack()
+        tk.Button(self, text="Go back to start page", command=lambda: master.switch_frame(StartPage)).pack()
 
 class PageTwo(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
         tk.Frame.configure(self,bg='red')
         tk.Label(self, text="Page two", font=('Helvetica', 18, "bold")).pack(side="top", fill="x", pady=5)
-        tk.Button(self, text="Go back to start page",
-                  command=lambda: master.switch_frame(StartPage)).pack()
+        tk.Button(self, text="Go back to start page", command=lambda: master.switch_frame(StartPage)).pack()
 
 if __name__ == "__main__":
-    app = SampleApp()
+    app = App()
     app.mainloop()
-
-
-
-
-
-
-
 
 
 
