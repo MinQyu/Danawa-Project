@@ -19,6 +19,8 @@ time.sleep(2)
 class App(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
+        photo = PhotoImage(file='d.png')
+        self.wm_iconphoto(False, photo)
         self.title("다나와 최저가 검색")
         self.geometry("1280x720+100+100")
         self.configure(bg='white')
