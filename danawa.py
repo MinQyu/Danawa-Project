@@ -74,6 +74,7 @@ class StartPage(tk.Frame):
             searchBox.send_keys(검색어)
             search = driver.find_element(By.CLASS_NAME, "search__submit")
             search.click()
+            master.switch_frame(PageOne) #페이지 전환
             Search_list()
 
         tk.Frame.__init__(self, master)
@@ -84,7 +85,6 @@ class StartPage(tk.Frame):
         txt = tk.Entry(self, relief="groove", insertbackground="green", highlightthickness=2, highlightcolor="lightgreen", font=font)
         txt.pack(fill=X, padx=10)
         tk.Button(self, text="검색", cursor="hand2", command=Search).pack(pady=10)
-        tk.Button(self, text="Go to page one", command=lambda: master.switch_frame(PageOne)).pack()
         tk.Button(self, text="Go to page two", command=lambda: master.switch_frame(PageTwo)).pack()
 
 def Search_list():
