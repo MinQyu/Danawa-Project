@@ -9,7 +9,6 @@ import tkinter.messagebox as msgbox
 import tkinter.font
 import time
 
-
 chrome_options = Options()
 chrome_options.add_experimental_option("detach", True)
 driver = webdriver.Chrome(options=chrome_options)
@@ -35,6 +34,7 @@ class App(tk.Tk):
             self._frame.destroy()
         self._frame = new_frame
         self._frame.pack(fill=BOTH)
+
 
 
 class StartPage(tk.Frame):
@@ -91,11 +91,16 @@ def Search_list():
 
 class PageOne(tk.Frame):
     def __init__(self, master):
+        def Back():
+            driver.get("https://danawa.com")
+            master.switch_frame(StartPage)
+            product_list.clear()
         tk.Frame.__init__(self, master)
         tk.Frame.configure(self,bg='white')
         tk.Label(self, text=product_list[0], font=('Helvetica', 18, "bold")).pack(expand=1, side="top", fill="x", pady=5)
-        tk.Button(self, text="Go back to start page", command=lambda: master.switch_frame(StartPage)).pack()
+        tk.Button(self, text="이전 페이지", command=Back).pack()
         print(product_list[0])
+
 
 
 class PageTwo(tk.Frame):
