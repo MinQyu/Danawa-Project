@@ -5,6 +5,7 @@ from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
 from tkinter import *
 import tkinter as tk
+import tkinter.messagebox as msgbox
 import tkinter.font
 import time
 
@@ -41,16 +42,18 @@ class StartPage(tk.Frame):
         icon = tk.PhotoImage(file="icon.png")
         font = tk.font.Font(family="맑은 고딕", size=15)
         def Search(event): #버튼 누를시 실행할 함수
-            검색어 = txt.get()
-            searchBox = driver.find_element(By.CLASS_NAME,"search__input")
-            searchBox.click()
-            time.sleep(2)
-            searchBox.send_keys(검색어)
-            search = driver.find_element(By.CLASS_NAME, "search__submit")
-            search.click()
-            master.switch_frame(PageOne) #페이지 전환
-            Search_list()
-
+            검색어 = str(txt.get())
+            if(검색어 != ""):
+                searchBox = driver.find_element(By.CLASS_NAME,"search__input")
+                searchBox.click()
+                time.sleep(2)
+                searchBox.send_keys(검색어)
+                search = driver.find_element(By.CLASS_NAME, "search__submit")
+                search.click()
+                master.switch_frame(PageOne) #페이지 전환
+                Search_list()
+            else:
+                msgbox.showinfo("알림", "검색어를 입력해주세요")
         tk.Frame.__init__(self, master)
         tk.Frame.configure(self,bg="white", width=1280)
         label = tk.Label(self, image=logo, bd=0, bg="white")
