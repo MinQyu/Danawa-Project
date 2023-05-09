@@ -41,7 +41,9 @@ class StartPage(tk.Frame):
         logo = tk.PhotoImage(file="logo.png")
         icon = tk.PhotoImage(file="icon.png")
         font = tk.font.Font(family="맑은 고딕", size=15)
-        def Search(event): #버튼 누를시 실행할 함수
+        def Enter(event):
+            Search()
+        def Search(): #버튼 누를시 실행할 함수
             검색어 = str(txt.get())
             if(검색어 != ""):
                 searchBox = driver.find_element(By.CLASS_NAME,"search__input")
@@ -60,9 +62,9 @@ class StartPage(tk.Frame):
         label.image = logo #가비지 컬렉터 삭제 방지
         label.pack(fill=X, pady=10)
         txt = tk.Entry(self, relief="groove", insertbackground="green", highlightthickness=2, highlightcolor="lightgreen", font=font)
-        txt.bind("<Return>",Search)
+        txt.bind("<Return>",Enter)
         txt.pack(expand=1, side="left", fill=X, padx=5)
-        btn = tk.Button(self, image=icon, bd=0, bg="white", relief="solid", repeatinterval=1000, cursor="hand2", command=Search, font=font)
+        btn = tk.Button(self, image=icon, bd=0, bg="white", relief="solid", repeatinterval=1000, cursor="hand2", command=Search)
         btn.image = icon #가비지 컬렉터 삭제 방지
         btn.pack(side="right",padx=5)
 
