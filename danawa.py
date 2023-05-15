@@ -83,6 +83,7 @@ def list_clear():
 def Search_list():
     soup = BeautifulSoup(driver.page_source, 'html.parser')
     goods_list = soup.select('div.main_prodlist.main_prodlist_list > ul > li')
+    tmp = "";
     for v in goods_list:
         new_text = ""
         if v.find('div', class_='prod_main_info'):
@@ -94,10 +95,12 @@ def Search_list():
             img_link = v.select_one('div.thumb_image > a > img').get('data-original')
         if img_link == None:
             img_link = v.select_one('div.thumb_image > a > img').get('src')
-        product_name.append("제품명: "+name)
-        product_info.append("제품정보: "+prod_info)
-        product_link.append("제품링크: "+prod_link)
-        image_link.append(img_link)
+        if name != tmp:
+            product_name.append("제품명: "+name)
+            product_info.append("제품정보: "+prod_info)
+            product_link.append("제품링크: "+prod_link)
+            image_link.append(img_link)
+            tmp = name
 
 
 
@@ -112,14 +115,14 @@ class PageOne(tk.Frame):
         scrollbar = tk.Scrollbar(self)
         scrollbar.pack(side="right", fill="y")
         Label_img = tk.Label(self, text="이미지", anchor = NW, bg = "white", font=('맑은 고딕', 18, "bold")).place(x=0, y=0)
-        Label_info = tk.Label(self, text="제품 정보", anchor = SW, bg = "white", font=('맑은 고딕', 18, "bold")).place(x=0, y=100)
-        Label_list = tk.Label(self, text="검색 결과", anchor = E, bg = "white", font=('맑은 고딕', 18, "bold")).pack(fill=BOTH,)
-        tk.Button(self, text="Back", command=Back).pack(side="left")
-        tk.Button(self, text="Select", command=NONE).pack(side="right")
-        Listbox = tk.Listbox(Label_list, bg = 'white', width = 0, height = 0, justify=LEFT, font=('맑은 고딕',12,"bold"),xscrollcommand=scrollbar.set, yscrollcommand=scrollbar.set)
+        Label_info = tk.Label(self, text="제품 정보", height = 5, anchor = SW, bg = "white", font=('맑은 고딕', 18, "bold")).place(x=0, y=250)
+        tk.Button(self, text="Back", command=Back).place(x=0, y=670)
+        tk.Button(self, text="Select", command=NONE).place(x=50, y=670)
+        Listbox = tk.Listbox(self, bg = 'white', width = -5, height = 0, justify=LEFT, font=('맑은 고딕',12,"bold"),xscrollcommand=scrollbar.set, yscrollcommand=scrollbar.set)
         for i in range(len(product_name)):
-            Listbox.insert(i,product_name.pop())
-
+            Listbox.insert(i,product_name[i])
+        Listbox.pack(side="right", fill=BOTH, padx=0)
+        scrollbar["command"]=Listbox.yview
 
 
 class PageTwo(tk.Frame):
