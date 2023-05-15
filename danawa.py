@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 from tkinter import *
 from PIL import Image, ImageTk
 from urllib.request import urlopen
+from io import BytesIO
 import tkinter as tk
 import tkinter.messagebox as msgbox
 import tkinter.font
@@ -16,6 +17,7 @@ chrome_options.add_experimental_option("detach", True)
 driver = webdriver.Chrome(options=chrome_options)
 driver.get("https://danawa.com")
 time.sleep(2)
+
 
 class App(tk.Tk):
     def __init__(self):
@@ -28,7 +30,7 @@ class App(tk.Tk):
         self.resizable(True, True)
         self._frame = None
         self.switch_frame(StartPage)
-        
+
     def switch_frame(self, frame_class):
         new_frame = frame_class(self)
         if self._frame is not None:
@@ -54,6 +56,7 @@ class StartPage(tk.Frame):
                 search.click()
                 Search_list()
                 master.switch_frame(PageOne) #페이지 전환
+                
             else:
                 msgbox.showinfo("알림", "검색어를 입력해주세요")
         tk.Frame.__init__(self, master)
@@ -68,7 +71,7 @@ class StartPage(tk.Frame):
         btn.image = icon #가비지 컬렉터 삭제 방지
         btn.pack(side="right",padx=5)
         
-#리스트 초기화
+
 product_list1=[]
 product_list2=[]
 product_list3=[]
@@ -79,7 +82,6 @@ def Search_list():
     soup = BeautifulSoup(driver.page_source, 'html.parser')
     goods_list = soup.select('div.main_prodlist.main_prodlist_list > ul > li')
     for v in goods_list:
-        new_text = ""
         if v.find('div', class_='prod_main_info'):
             name = v.select_one('p.prod_name > a').text.strip()
             prod_info = ''  # 제품스펙
@@ -89,6 +91,7 @@ def Search_list():
             img_link = v.select_one('div.thumb_image > a > img').get('data-original')
             if img_link == None:
                 img_link = v.select_one('div.thumb_image > a > img').get('src')
+            print(img_link)
         name_list = "제품명: " + name
         spec_list = "제품정보: " + prod_info
         prolink_list = "제품링크: " + product_link
@@ -97,7 +100,6 @@ def Search_list():
         product_list2.append(spec_list)
         product_list3.append(prolink_list)
         product_list4.append(imglink_list) 
-        print(img_link)
 
 class PageOne(tk.Frame):
     def __init__(self, master):
@@ -125,20 +127,22 @@ class PageOne(tk.Frame):
 
         Listbox.insert(1,product_list1[0])
         Listbox.delete(0,len(product_list1))
-        Listbox.pack(side="left", padx = 10, pady = 10)
+        Listbox.pack(padx = 150, pady = 10)
         tk.Button(self, text="1pg", command=lambda: master.switch_frame(StartPage)).pack()
-       
-        '''
-        for i in range (len(product_list1)): 
-            URL = "https://img.danawa.com/prod_img/500000/165/475/img/19475165_1.jpg?shrink=130:130"
-            u = urlopen(URL)
-            raw_data = u.read()
-            u.close()
-            im = Image.open(BytesIO(raw_data))
-            photo = ImageTk.PhotoImage(im)
-            label = tk.Label(image=photo, width = 100, height = 55)
-            label.image = photo
-            label.pack(side= "top")
+        tk.Button(self, text="이전 페이지", command=Back).pack()
+    
+        '''이미지출력함수
+        def photo():
+            for i in range(len(product_list1)):
+                URL = "https://img.danawa.com/prod_img/500000/165/475/img/19475165_1.jpg?shrink=130:130"
+                u = urlopen(URL)
+                raw_data = u.read()
+                u.close()
+                im = Image.open(BytesIO(raw_data))
+                photo = ImageTk.PhotoImage(im)
+                label = tk.Label(image=photo, anchor = "nw", width = 120, height = 70)
+                label.image = photo
+                label.place(x=0,y=50 + i * 50)
         '''
         scrollbar["command"]=Listbox.yview
 
