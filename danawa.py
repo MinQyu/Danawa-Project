@@ -158,7 +158,6 @@ class PageOne(tk.Frame):
         tk.Button(self, text="Select", command=Next).place(x=50, y=670)
         scrollbar["command"]=Listbox.yview
 
-
 class PageTwo(tk.Frame):
     def __init__(self, master):
         
