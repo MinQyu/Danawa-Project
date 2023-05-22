@@ -126,6 +126,7 @@ class PageOne(tk.Frame):
             list_clear()
         def event_for_listbox(event): 
             w = event.widget
+            global idx
             idx = int(w.curselection()[0])
             Info_list = tk.Label(self, text=product_info[idx], height = 8, justify = LEFT ,wraplength = 560,anchor = SW, bg = "white", font=('맑은 고딕', 12, "bold")).place(x=0, y=470)
         tk.Frame.__init__(self, master)
