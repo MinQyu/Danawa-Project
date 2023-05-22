@@ -5,6 +5,8 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from bs4 import BeautifulSoup
 from tkinter import *
+from urllib.request import urlopen
+import base64
 import tkinter as tk
 import tkinter.messagebox as msgbox
 import tkinter.font
@@ -51,7 +53,7 @@ class StartPage(tk.Frame):
                 searchBox.send_keys(search_word)
                 search = driver.find_element(By.CLASS_NAME, "search__submit")
                 search.click()
-                time.sleep(1)
+                time.sleep(0.5)
                 scrolling()
                 search_list()
                 master.switch_frame(PageOne) #페이지 전환
@@ -73,6 +75,7 @@ product_name=[]
 product_info=[]
 product_link=[]
 image_link=[]
+idx = -1
 
 def list_clear():
     product_name.clear()
@@ -81,13 +84,10 @@ def list_clear():
     product_link.clear()
 
 def scrolling():
-    lastHeight = driver.execute_script("return document.body.scrollHeight")
-    while True:
-        
-        newHeight = driver.execute_script("return document.body.scrollHeight")
-        if newHeight == lastHeight:
-            break
-        lastHeight = newHeight
+    element=driver.find_element(By.TAG_NAME,"html")
+    for i in range(35):
+        element.send_keys(Keys.SPACE)
+
 
 
 
@@ -119,7 +119,7 @@ def search_list():
 #1페이지            
 class PageOne(tk.Frame):
     def __init__(self, master):
-        idx = -1;
+
         def Back():
             driver.get("https://danawa.com")
             master.switch_frame(StartPage)
@@ -129,14 +129,19 @@ class PageOne(tk.Frame):
             global idx
             idx = int(w.curselection()[0])
             Info_list = tk.Label(self, text=product_info[idx], height = 8, justify = LEFT ,wraplength = 560,anchor = SW, bg = "white", font=('맑은 고딕', 12, "bold")).place(x=0, y=470)
+            tmp = urlopen(image_link[idx]).read()
+            img64 = base64.encodebytes(tmp)
+            photo = tk.PhotoImage(data=img64)
+            Label_img.create_image(0, 0, photo)
+
         tk.Frame.__init__(self, master)
         tk.Frame.configure(self,bg='white')
         scrollbar = tk.Scrollbar(self)
         scrollbar.pack(side="right", fill="y")
-        Label_img = tk.Label(self, text="이미지", anchor = NW, bg = "white", font=('맑은 고딕', 18, "bold")).place(x=0, y=0)
+        Label_img = tk.Canvas(self, bg="white").place(x=0, y=0)
         Label_info = tk.Label(self, text="제품 정보", height = 5, anchor = SW, bg = "white", font=('맑은 고딕', 18, "bold")).place(x=0, y=250)
         Listbox = tk.Listbox(self, bg='white', width=70, height = 0, justify=LEFT, selectbackground="chartreuse3", highlightcolor="lightgreen", highlightthickness=2, activestyle="none", font=('맑은 고딕',12,"bold"),yscrollcommand=scrollbar.set)
-        for i in range(len(product_name)):
+        for i in range(40):
             Listbox.insert(i,product_name[i])
         Listbox.pack(side="right", fill=BOTH, padx=0)
         Listbox.bind('<<ListboxSelect>>', event_for_listbox)
