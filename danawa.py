@@ -5,9 +5,10 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from bs4 import BeautifulSoup
 from tkinter import *
-from urllib.request import urlopen
-import base64
 import tkinter as tk
+from io import BytesIO
+from PIL import Image, ImageTk
+from urllib.request import urlopen
 import tkinter.messagebox as msgbox
 import tkinter.font
 import time
@@ -53,7 +54,7 @@ class StartPage(tk.Frame):
                 searchBox.send_keys(search_word)
                 search = driver.find_element(By.CLASS_NAME, "search__submit")
                 search.click()
-                time.sleep(0.5)
+                time.sleep(1)
                 scrolling()
                 search_list()
                 master.switch_frame(PageOne) #페이지 전환
@@ -75,7 +76,6 @@ product_name=[]
 product_info=[]
 product_link=[]
 image_link=[]
-idx = -1
 
 def list_clear():
     product_name.clear()
@@ -83,79 +83,87 @@ def list_clear():
     image_link.clear()
     product_link.clear()
 
+
+
 def scrolling():
     element=driver.find_element(By.TAG_NAME,"html")
-    for i in range(35):
+    for i in range(30):
         element.send_keys(Keys.SPACE)
-
-
-
+   
+idx = -1 # 리스트박스 인덱스
 
 #제품 가격 크롤링 함수            
 def search_list():
+    global product_info
     soup = BeautifulSoup(driver.page_source, 'html.parser')
     goods_list = soup.select('div.main_prodlist.main_prodlist_list > ul > li')
     tmp = "";
     for v in goods_list:
         new_text = ""
         if v.find('div', class_='prod_main_info'):
-            name = v.select_one('p.prod_name > a').text.strip()
-            prod_info = ''  # 제품스펙
-            for s in v.select('div.spec_list > a'):
-                prod_info += s.text + '/'
+            name = v.select_one('p.prod_name > a').text.strip()  
             prod_link = v.select_one('p.prod_name > a')['href']
             img_link = v.select_one('div.thumb_image > a > img').get('data-original')
         if img_link == None:
             img_link = v.select_one('div.thumb_image > a > img').get('src')
         if name != tmp:
             product_name.append(name)
-            product_info.append(prod_info)
+            #product_info.append()
             product_link.append(prod_link)
             image_link.append("https:"+img_link)
             tmp = name
-    for i in range(len(image_link)):
-        print(image_link[i])
-        print('\n')
+    product_info = driver.find_elements(By.CLASS_NAME, "spec_list")
+    
 #1페이지            
 class PageOne(tk.Frame):
     def __init__(self, master):
-
-        def Back():
+        def Back(): #이전 페이지
             driver.get("https://danawa.com")
             master.switch_frame(StartPage)
             list_clear()
-        def event_for_listbox(event): 
-            w = event.widget
-            global idx
-            idx = int(w.curselection()[0])
-            Info_list = tk.Label(self, text=product_info[idx], height = 8, justify = LEFT ,wraplength = 560,anchor = SW, bg = "white", font=('맑은 고딕', 12, "bold")).place(x=0, y=470)
-            tmp = urlopen(image_link[idx]).read()
-            img64 = base64.encodebytes(tmp)
-            photo = tk.PhotoImage(data=img64)
-            Label_img.create_image(0, 0, photo)
-
-        tk.Frame.__init__(self, master)
-        tk.Frame.configure(self,bg='white')
-        scrollbar = tk.Scrollbar(self)
-        scrollbar.pack(side="right", fill="y")
-        Label_img = tk.Canvas(self, bg="white").place(x=0, y=0)
-        Label_info = tk.Label(self, text="제품 정보", height = 5, anchor = SW, bg = "white", font=('맑은 고딕', 18, "bold")).place(x=0, y=250)
-        Listbox = tk.Listbox(self, bg='white', width=70, height = 0, justify=LEFT, selectbackground="chartreuse3", highlightcolor="lightgreen", highlightthickness=2, activestyle="none", font=('맑은 고딕',12,"bold"),yscrollcommand=scrollbar.set)
-        for i in range(40):
-            Listbox.insert(i,product_name[i])
-        Listbox.pack(side="right", fill=BOTH, padx=0)
-        Listbox.bind('<<ListboxSelect>>', event_for_listbox)
-        #다음 페이지로 넘어가는 함수
-        def Next():
+        def Next():#다음 페이지로 넘어가는 함수
             if idx == -1:
                 msgbox.showinfo("알림", "제품을 선택해주세요")
             else:
                 driver.get(product_link[idx])
                 master.switch_frame(PageTwo)
-
-        tk.Button(self, text="Back", command=Back).place(x=0, y=670)
-        tk.Button(self, text="Select", command=Next).place(x=50, y=670)
+        def event_for_listbox(event): #리스트박스 항목 클릭시
+            global idx
+            w = event.widget
+            idx = int(w.curselection()[0])
+            Li = NONE;
+            Lg = NONE;
+            if Li is not NONE: #라벨 중첩 방지
+                Li.destroy()
+                Lg.destroy()
+            Li= tk.Label(self, text=product_info[idx].text, height = 15, width = 60, justify = LEFT ,wraplength = 600, anchor = SW, bg = "white", font=('맑은 고딕', 12, "bold")).place(x=5, y=350)
+            u = urlopen(image_link[idx])
+            raw_data = u.read()
+            u.close()
+            img = Image.open(BytesIO(raw_data))
+            img_resize = img.resize((200,200))
+            photo = ImageTk.PhotoImage(img_resize)
+            Lg = tk.Label(image=photo, bg = "white", width = 200, height = 200).place(x = 200, y = 60)
+            Lg.image = photo #가비지 컬렉터 삭제 방지
+        tk.Frame.__init__(self, master)
+        tk.Frame.configure(self,bg='white')
+        scrollbar = tk.Scrollbar(self)
+        scrollbar.pack(side="right", fill="y")
+        Label_img = tk.Label(self, text="이미지", anchor = NW, bg = "white", font=('맑은 고딕', 15, "bold")).place(x=0, y=0)
+        Label_info = tk.Label(self, text="제품 정보", anchor = SW, bg = "white", font=('맑은 고딕', 15, "bold")).place(x=0, y=320)
+        Listbox = tk.Listbox(self, bg='white', width=70, height = 0, justify=LEFT, selectbackground="chartreuse3",
+                             highlightcolor="lightgreen", highlightthickness=2, activestyle="none", font=('맑은 고딕',12,"bold"),yscrollcommand=scrollbar.set)
+        for i in range(40):
+            Listbox.insert(i,product_name[i])
+        Listbox.pack(side="right", fill=BOTH, padx=0)
+        Listbox.bind('<<ListboxSelect>>', event_for_listbox)
+        tk.Button(self, text="Back", command=Back).place(x=25, y=680)
+        tk.Button(self, text="Select", command=Next).place(x=75, y=680)
         scrollbar["command"]=Listbox.yview
+
+
+
+
 
 class PageTwo(tk.Frame):
     def __init__(self, master):
@@ -167,3 +175,4 @@ class PageTwo(tk.Frame):
 if __name__ == "__main__":
     app = App()
     app.mainloop()
+
