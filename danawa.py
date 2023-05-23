@@ -131,26 +131,25 @@ class PageOne(tk.Frame):
             global idx
             w = event.widget
             idx = int(w.curselection()[0])
-            Li = NONE;
-            Lg = NONE;
-            if Li is not NONE: #라벨 중첩 방지
-                Li.destroy()
-                Lg.destroy()
-            Li= tk.Label(self, text=product_info[idx].text, height = 15, width = 60, justify = LEFT ,wraplength = 600, anchor = SW, bg = "white", font=('맑은 고딕', 12, "bold")).place(x=5, y=350)
+            label_info.config(text=product_info[idx].text)
             u = urlopen(image_link[idx])
             raw_data = u.read()
             u.close()
             img = Image.open(BytesIO(raw_data))
             img_resize = img.resize((200,200))
             photo = ImageTk.PhotoImage(img_resize)
-            Lg = tk.Label(image=photo, bg = "white", width = 200, height = 200).place(x = 200, y = 60)
-            Lg.image = photo #가비지 컬렉터 삭제 방지
+            label_img.config(image=photo)
+            label_img.image = photo #가비지 컬렉터 삭제 방지
         tk.Frame.__init__(self, master)
         tk.Frame.configure(self,bg='white')
         scrollbar = tk.Scrollbar(self)
         scrollbar.pack(side="right", fill="y")
-        Label_img = tk.Label(self, text="이미지", anchor = NW, bg = "white", font=('맑은 고딕', 15, "bold")).place(x=0, y=0)
-        Label_info = tk.Label(self, text="제품 정보", anchor = SW, bg = "white", font=('맑은 고딕', 15, "bold")).place(x=0, y=320)
+        tk.Label(self, text="이미지", anchor = NW, bg = "white", font=('맑은 고딕', 15, "bold")).place(x=0, y=0)
+        tk.Label(self, text="제품 정보", anchor = SW, bg = "white", font=('맑은 고딕', 15, "bold")).place(x=0, y=320)
+        label_info= tk.Label(self, text="상품을 선택 후"+"\n"+"select 버튼을 눌러주세요", height = 15, width = 60, justify = LEFT ,wraplength = 600, anchor = SW, bg = "white", font=('맑은 고딕', 12, "bold"))
+        label_info.place(x=5, y=350)
+        label_img = tk.Label(self, bg = "white", width = 200, height = 200)
+        label_img.place(x = 200, y = 60)
         Listbox = tk.Listbox(self, bg='white', width=70, height = 0, justify=LEFT, selectbackground="chartreuse3",
                              highlightcolor="lightgreen", highlightthickness=2, activestyle="none", font=('맑은 고딕',12,"bold"),yscrollcommand=scrollbar.set)
         for i in range(40):
@@ -160,6 +159,7 @@ class PageOne(tk.Frame):
         tk.Button(self, text="Back", command=Back).place(x=25, y=680)
         tk.Button(self, text="Select", command=Next).place(x=75, y=680)
         scrollbar["command"]=Listbox.yview
+        
 
 
 
