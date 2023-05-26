@@ -172,7 +172,6 @@ class PageOne(tk.Frame):
             if Cou_site == None: #해당마켓에 상품 존재하지 않을 시 함수 종료
                 return  
             Price_driver.implicitly_wait(10)
-            Price_driver.implicitly_wait(10)
             Price_driver.get(Cou_site)
             Price_driver.implicitly_wait(10)
             try: 
@@ -191,7 +190,6 @@ class PageOne(tk.Frame):
             E_site = Ele_number()
             if E_site == None:
                 return
-            driver.implicitly_wait(10)
             Price_driver.implicitly_wait(10)
             Price_driver.get(E_site)
             Price_driver.implicitly_wait(10)
@@ -291,7 +289,6 @@ class PageOne(tk.Frame):
                 Auction_prodnumber = Auction_url[First_index+len("link_pcode")+1:Last_index]
                 return Auction_prodnumber
 
-        #쿠팡 상품 정보 크롤링
         def Coupang_number():
             try: 
                 Coupang_link = driver.find_element(By.XPATH, '//img[@alt="쿠팡"]')
