@@ -175,16 +175,16 @@ class PageOne(tk.Frame):
             Price_driver.implicitly_wait(10)
             Price_driver.get(Cou_site)
             Price_driver.implicitly_wait(10)
-            #쿠폰 적용 없는 경우
-            Cou_price = Price_driver.find_element(By.CLASS_NAME, "total-price").text
             try: 
                 #와우 회원 할인 적용 되는 경우
                 Cou_discountprice = Price_driver.find_element(By.XPATH, '//*[@id="contents"]/div[1]/div/div[3]/div[5]/div[1]/div/div[3]/span[1]/strong').text
                 print("쿠폰 적용 여부: 와우 회원만 쿠폰 적용 가능")
-                print("실제 가격: " + Cou_discountprice)
+                print("쿠폰 적용 시 실제 가격: " + Cou_discountprice)
             except NoSuchElementException: 
-               print("쿠폰 적용 여부: X")
-               print("실제 가격: " + Cou_price)
+                #쿠폰이 없는 경우
+                Cou_price = Price_driver.find_element(By.CLASS_NAME, "total-price").text
+                print("쿠폰 적용 여부: X")
+                print("실제 가격: " + Cou_price)
 
         def EleSearch(): 
             driver.implicitly_wait(10)
@@ -196,15 +196,16 @@ class PageOne(tk.Frame):
             Price_driver.get(E_site)
             Price_driver.implicitly_wait(10)
             try:
-                #와우 회원 할인 적용 되는 경우
+                #11번가 쿠폰이 있는 경우
                 Ele_discount = Price_driver.find_element(By.CLASS_NAME,'price_modiscount').text
                 Ele_discountprice = Price_driver.find_element(By.XPATH, '//*[@id="layBodyWrap"]/div/div[1]/div[2]/div/div[1]/div[2]/div[2]/div[3]/div/div/ul/li/dl[1]/dd/strong/span[1]').text
                 print("쿠폰 적용 여부: " + Ele_discount)
                 print("실제 가격: " + Ele_discountprice + "원")
             except NoSuchElementException: 
+                #쿠폰이 없거나 적용 못하는 경우
                 Ele_price = Price_driver.find_element(By.CLASS_NAME, 'value').text                 
                 print("쿠폰 적용 여부: x")
-                print("실제 가격: " + Ele_price)    
+                print("실제 가격: " + Ele_price + "원")    
 
         def GmarketSearch(): 
             driver.implicitly_wait(10)
@@ -216,6 +217,15 @@ class PageOne(tk.Frame):
             Price_driver.implicitly_wait(10)
             Price_driver.get(G_site)
             Price_driver.implicitly_wait(10)
+            try:
+                #쿠폰 적용(여러가지 쿠폰이 적용 될 수 있어서 수정 해야함)
+                G_discount = driver.find_element(By.CLASS_NAME,'text__ellipsis' ).text
+                print(G_discount)
+            except NoSuchElementException:
+                #쿠폰이 없거나 적용 못하는 경우
+                G_price = Price_driver.find_element(By.XPATH, '//*[@id="itemcase_basic"]/div/div[4]/span[2]/strong').text
+                print("쿠폰 적용 여부: x")
+                print("실제 가격: " + G_price)
 
         def AuctionSearch(): 
             driver.implicitly_wait(10)
@@ -226,6 +236,16 @@ class PageOne(tk.Frame):
             Auc_site = "http://itempage3.auction.co.kr/DetailView.aspx?itemno=" + Auc_number
             Price_driver.implicitly_wait(10)
             Price_driver.get(Auc_site)
+            Price_driver.implicitly_wait(10)
+            try:
+                #쿠폰 적용(여러가지 쿠폰이 적용 될 수 있어서 수정 해야함)
+                Auc_discount = driver.find_element(By.XPATH,'//*[@id="frmMain"]/div[5]/a' ).text
+                print(Auc_discount)
+            except NoSuchElementException:
+                #쿠폰이 없거나 적용 못하는 경우
+                Auc_price = Price_driver.find_element(By.CLASS_NAME, 'price_real').text
+                print("쿠폰 적용 여부: x")
+                print("실제 가격: " + Auc_price)
             Price_driver.implicitly_wait(10)
 
 
