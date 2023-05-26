@@ -138,13 +138,13 @@ class PageOne(tk.Frame):
                 #제품 선택 시 4사 마켓의 제품가격, 쿠폰 적용 여부, 실제 가격 확인
                 driver.get(product_link[idx])
                 CoupangSearch()
-                driver.implicitly_wait(10)
-                EleSearch()
-                driver.implicitly_wait(10)
+                Price_driver.implicitly_wait(10)
                 GmarketSearch()
-                driver.implicitly_wait(10)
+                Price_driver.implicitly_wait(10)
                 AuctionSearch()
-                driver.implicitly_wait(10)
+                Price_driver.implicitly_wait(10)
+                EleSearch()
+                Price_driver.implicitly_wait(10)
                 master.switch_frame(PageTwo)
 
 
@@ -163,40 +163,46 @@ class PageOne(tk.Frame):
             label_img.config(image=photo)
             label_img.image = photo #가비지 컬렉터 삭제 방지
 
+
+
         #4사 마켓 가격 크롤링 함수 
         def CoupangSearch(): 
             driver.implicitly_wait(10)
-            Cou_number = Coupang_number()
-            if Cou_number == None: #해당마켓에 상품 존재하지 않을 시 함수 종료
+            Cou_site = Coupang_number()
+            if Cou_site == None: #해당마켓에 상품 존재하지 않을 시 함수 종료
                 return  
-            driver.implicitly_wait(10)
-            Cou_site = "https://www.coupang.com/vp/products/" + Cou_number
+            Price_driver.implicitly_wait(10)
+            Price_driver.implicitly_wait(10)
             Price_driver.get(Cou_site)
-            driver.implicitly_wait(10)
+            Price_driver.implicitly_wait(10)
+            #쿠폰 적용 없는 경우
             Cou_price = Price_driver.find_element(By.CLASS_NAME, "total-price").text
             try: 
+                #와우 회원 할인 적용 되는 경우
                 Cou_discountprice = Price_driver.find_element(By.XPATH, '//*[@id="contents"]/div[1]/div/div[3]/div[5]/div[1]/div/div[3]/span[1]/strong').text
                 print("쿠폰 적용 여부: 와우 회원만 쿠폰 적용 가능")
                 print("실제 가격: " + Cou_discountprice)
             except NoSuchElementException: 
                print("쿠폰 적용 여부: X")
                print("실제 가격: " + Cou_price)
+
         def EleSearch(): 
             driver.implicitly_wait(10)
-            E_number = Ele_number()
-            if E_number == None:
+            E_site = Ele_number()
+            if E_site == None:
                 return
             driver.implicitly_wait(10)
-            E_site = "https://www.11st.co.kr/products/" + E_number
+            Price_driver.implicitly_wait(10)
             Price_driver.get(E_site)
-            driver.implicitly_wait(10)
+            Price_driver.implicitly_wait(10)
             try:
+                #와우 회원 할인 적용 되는 경우
                 Ele_discount = Price_driver.find_element(By.CLASS_NAME,'price_modiscount').text
                 Ele_discountprice = Price_driver.find_element(By.XPATH, '//*[@id="layBodyWrap"]/div/div[1]/div[2]/div/div[1]/div[2]/div[2]/div[3]/div/div/ul/li/dl[1]/dd/strong/span[1]').text
                 print("쿠폰 적용 여부: " + Ele_discount)
                 print("실제 가격: " + Ele_discountprice + "원")
-            except NoSuchElementException:                                  
-                Ele_price = Price_driver.find_element(By.XPATH, '//*[@id="layBodyWrap"]/div/div[1]/div[2]/div/div[1]/div[2]/div[2]/div[2]/div/div/ul/li/dl/dd/strong/span[1]').text
+            except NoSuchElementException: 
+                Ele_price = Price_driver.find_element(By.CLASS_NAME, 'value').text                 
                 print("쿠폰 적용 여부: x")
                 print("실제 가격: " + Ele_price)    
 
@@ -207,8 +213,9 @@ class PageOne(tk.Frame):
                 return
             driver.implicitly_wait(10)
             G_site = "https://item.gmarket.co.kr/Item?goodscode=" + Gmk_number
+            Price_driver.implicitly_wait(10)
             Price_driver.get(G_site)
-            driver.implicitly_wait(10)
+            Price_driver.implicitly_wait(10)
 
         def AuctionSearch(): 
             driver.implicitly_wait(10)
@@ -217,8 +224,9 @@ class PageOne(tk.Frame):
                 return
             driver.implicitly_wait(10)
             Auc_site = "http://itempage3.auction.co.kr/DetailView.aspx?itemno=" + Auc_number
+            Price_driver.implicitly_wait(10)
             Price_driver.get(Auc_site)
-            driver.implicitly_wait(10)
+            Price_driver.implicitly_wait(10)
 
 
 
@@ -230,6 +238,7 @@ class PageOne(tk.Frame):
             except NoSuchElementException: 
                 print("제품이 존재하지 않습니다.")
             else:
+                driver.implicitly_wait(10)
                 driver.switch_to.window(driver.window_handles[1])
                 driver.implicitly_wait(10)
                 Gmarket_url = driver.current_url
@@ -249,6 +258,7 @@ class PageOne(tk.Frame):
             except NoSuchElementException: 
                 print("제품이 존재하지 않습니다.")
             else:
+                driver.implicitly_wait(10)
                 driver.switch_to.window(driver.window_handles[1])
                 driver.implicitly_wait(10)
                 Auction_url = driver.current_url
@@ -269,17 +279,14 @@ class PageOne(tk.Frame):
             except NoSuchElementException: 
                 print("제품이 존재하지 않습니다.")
             else:
-                time.sleep(8)
+                time.sleep(7)
                 driver.switch_to.window(driver.window_handles[1])
                 Coupang_url = driver.current_url
-                First_index= Coupang_url.find("products/")
-                Last_index = Coupang_url.find("?")
                 driver.implicitly_wait(10)
                 driver.close()
                 driver.switch_to.window(driver.window_handles[0])
                 driver.implicitly_wait(10)
-                Coupang_prodnumber = Coupang_url[First_index +len("products/"):Last_index]
-                return Coupang_prodnumber
+                return Coupang_url
             
         def Ele_number():
             try: 
@@ -288,18 +295,14 @@ class PageOne(tk.Frame):
             except NoSuchElementException: 
                 print("제품이 존재하지 않습니다.")
             else:
-                time.sleep(3)
+                time.sleep(7)
                 driver.switch_to.window(driver.window_handles[1])
                 driver.implicitly_wait(10)
                 Ele_url = driver.current_url
-                First_index= Ele_url.find("link_pcode")
-                Last_index = Ele_url.find("&package") 
-                driver.implicitly_wait(10)
                 driver.close()
                 driver.switch_to.window(driver.window_handles[0])
                 driver.implicitly_wait(10)
-                Ele_pronumber = Ele_url[First_index+len("link_pcode")+1:Last_index]
-                return Ele_pronumber    
+                return Ele_url    
             
 
 
