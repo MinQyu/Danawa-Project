@@ -9,6 +9,7 @@ from io import BytesIO
 from PIL import Image, ImageTk
 from urllib.request import urlopen
 import tkinter as tk
+import tkinter.ttk
 import tkinter.messagebox as msgbox
 import tkinter.font
 import time
@@ -25,7 +26,7 @@ class App(tk.Tk):
         photo = PhotoImage(file='d.png')
         self.wm_iconphoto(False, photo)
         self.title("다나와 최저가 검색")
-        self.geometry("1280x720+100+100")
+        self.geometry("1280x720")
         self.configure(bg='white')
         self.resizable(False, False)
         self._frame = None
@@ -36,7 +37,7 @@ class App(tk.Tk):
         if self._frame is not None:
             self._frame.destroy()
         self._frame = new_frame
-        self._frame.pack(fill=BOTH)
+        self._frame.pack(expand=1, fill=BOTH)
 #검색페이지
 class StartPage(tk.Frame):
     def __init__(self, master):
@@ -61,16 +62,18 @@ class StartPage(tk.Frame):
             else:
                 msgbox.showinfo("알림", "검색어를 입력해주세요")
         tk.Frame.__init__(self, master)
-        tk.Frame.configure(self,bg="white", width=1280)
+        tk.Frame.configure(self,bg="white")
         label = tk.Label(self, image=logo, bd=0, bg="white")
         label.image = logo #가비지 컬렉터 삭제 방지
         label.pack(fill=X, pady=10)
         txt = tk.Entry(self, relief="groove", insertbackground="green", highlightthickness=2, highlightcolor="lightgreen", font=font)
         txt.bind("<Return>",Enter)
-        txt.pack(expand=1, side="left", fill=X, padx=5)
+        txt.pack(expand=1, side="left", anchor="n", fill=X, padx=5)
         btn = tk.Button(self, image=icon, bd=0, bg="white", relief="solid", repeatinterval=1000, cursor="hand2", command=Search)
         btn.image = icon #가비지 컬렉터 삭제 방지
-        btn.pack(side="right",padx=5)
+        btn.pack(side="right", anchor="n", padx=5)
+        progressbar = tkinter.ttk.Progressbar(self, mode="indeterminate")
+        progressbar.place(x=470, y=685, width=800, height=25)
 
 product_name=[]
 product_info=[]
@@ -116,6 +119,18 @@ def search_list():
             tmp = name
     product_info = driver.find_elements(By.CLASS_NAME, "spec_list")
     
+'''
+def coupang_search():
+
+def gmarket_search():
+
+def auction_search():
+
+def ele_search():
+'''
+
+    
+
 #1페이지            
 class PageOne(tk.Frame):
     def __init__(self, master):
@@ -127,8 +142,19 @@ class PageOne(tk.Frame):
             if idx == -1:
                 msgbox.showinfo("알림", "제품을 선택해주세요")
             else:
+                #제품 선택 시 4사 마켓의 제품가격, 쿠폰 적용 여부, 실제 가격 확인
                 driver.get(product_link[idx])
+                '''
+                coupang_search()
+                Price_driver.implicitly_wait(10)
+                gmarket_search()
+                Price_driver.implicitly_wait(10)
+                auction_search()
+                Price_driver.implicitly_wait(10)
+                ele_search()
+                Price_driver.implicitly_wait(10)
                 master.switch_frame(PageTwo)
+                '''
         def event_for_listbox(event): #리스트박스 항목 클릭시
             global idx
             w = event.widget
@@ -146,25 +172,25 @@ class PageOne(tk.Frame):
         tk.Frame.configure(self, bg='white')
         scrollbar = tk.Scrollbar(self)
         scrollbar.pack(side="right", fill="y")
-        tk.Label(self, text="이미지", anchor = NW, bg = "white", font=('맑은 고딕', 15, "bold")).place(x=5, y=0)
-        tk.Label(self, text="제품 정보", anchor = SW, bg = "white", font=('맑은 고딕', 15, "bold")).place(x=5, y=320)
-        label_info= tk.Label(self, text="상품을 선택 후 select 버튼을 눌러주세요", height = 15, width = 60, highlightthickness=2, highlightbackground="lightgreen",
-                             relief="groove", justify = LEFT ,wraplength = 600, anchor = NW, bg = "white", font=('맑은 고딕', 12, "bold"))
-        label_info.place(x=5, y=350)
+        tk.Label(self, text="이미지", anchor = W, bg = "white", font=('맑은 고딕', 15, "bold")).place(x=7, y=10)
+        tk.Label(self, text="제품 정보", anchor = SW, bg = "white", font=('맑은 고딕', 15, "bold")).place(x=7, y=315)
+        tk.Label(self, text="제품 목록", anchor = W, bg = "white", font=('맑은 고딕', 15, "bold")).place(x=637, y=10)
+        label_info= tk.Label(self, text="상품을 선택 후 select 버튼을 눌러주세요", height = 15, width = 68, highlightthickness=2, highlightbackground="lightgreen",
+                             relief="groove", justify = LEFT ,wraplength = 600, anchor = NW, bg = "white", font=('맑은 고딕', 12))
+        label_info.place(x=7, y=350)
         label_img = tk.Label(self, bg = "white")
-        label_img.place(x = 200, y = 60)
-        Listbox = tk.Listbox(self, bg='white', width=70, height = 0, justify=LEFT, selectbackground="chartreuse3",
-                             highlightbackground="lightgreen", highlightcolor="lightgreen", highlightthickness=2, activestyle="none", font=('맑은 고딕',12,"bold"),yscrollcommand=scrollbar.set)
+        label_img.place(x = 202, y = 60)
+        Listbox = tk.Listbox(self, bg='white', width=68, height = 0, justify=LEFT, selectbackground="chartreuse3",
+                             relief="groove", highlightbackground="lightgreen", highlightcolor="lightgreen", highlightthickness=2, activestyle="none",
+                             font=('맑은 고딕',12),yscrollcommand=scrollbar.set)
         for i in range(40):
             Listbox.insert(i,product_name[i])
-        Listbox.pack(side="right", fill=BOTH, padx=0)
+        Listbox.pack(side="right", fill=BOTH, padx=5, pady=45)
         Listbox.bind('<<ListboxSelect>>', event_for_listbox)
-        tk.Button(self, text="Back", command=Back).place(x=25, y=685)
-        tk.Button(self, text="Select", command=Next).place(x=85, y=685)
+        tk.Button(self, text="Back", bg="white", command=Back).place(x=25, y=685)
+        tk.Button(self, text="Select", bg="white", command=Next).place(x=85, y=685)
         scrollbar["command"]=Listbox.yview
         
-
-
 
 
 
