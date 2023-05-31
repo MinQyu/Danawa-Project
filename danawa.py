@@ -49,15 +49,25 @@ class StartPage(tk.Frame):
         def Search(): #버튼 누를시 실행할 함수
             search_word = str(txt.get())
             if(search_word != ""):
+                progressbar.config(value=10)
+                progressbar.update()
                 searchBox = driver.find_element(By.CLASS_NAME,"search__input")
                 searchBox.click()
                 time.sleep(0.5)
                 searchBox.send_keys(search_word)
                 search = driver.find_element(By.CLASS_NAME, "search__submit")
                 search.click()
+                progressbar.config(value=20)
+                progressbar.update()
                 time.sleep(1)
+                progressbar.config(value=30)
+                progressbar.update()
                 scrolling()
+                progressbar.config(value=80)
+                progressbar.update()
                 search_list()
+                progressbar.config(value=90)
+                progressbar.update()
                 master.switch_frame(PageOne) #페이지 전환
             else:
                 msgbox.showinfo("알림", "검색어를 입력해주세요")
@@ -72,14 +82,16 @@ class StartPage(tk.Frame):
         btn = tk.Button(self, image=icon, bd=0, bg="white", relief="solid", repeatinterval=1000, cursor="hand2", command=Search)
         btn.image = icon #가비지 컬렉터 삭제 방지
         btn.pack(side="right", anchor="n", padx=5)
-        progressbar = tkinter.ttk.Progressbar(self, mode="indeterminate")
-        progressbar.place(x=470, y=685, width=800, height=25)
+        progressbar = tkinter.ttk.Progressbar(self, mode="determinate", maximum=100, value=0)
+        progressbar.place(x=460, y=685, width=800, height=25)
 
 product_name=[]
 product_info=[]
 product_link=[]
 image_link=[]
 idx = -1 # 리스트박스 인덱스
+
+
 
 def list_clear():
     global idx
@@ -189,6 +201,8 @@ class PageOne(tk.Frame):
         Listbox.bind('<<ListboxSelect>>', event_for_listbox)
         tk.Button(self, text="Back", bg="white", command=Back).place(x=25, y=685)
         tk.Button(self, text="Select", bg="white", command=Next).place(x=85, y=685)
+        progressbar = tkinter.ttk.Progressbar(self, mode="determinate", maximum=100, value=0)
+        progressbar.place(x=460, y=685, width=800, height=25)
         scrollbar["command"]=Listbox.yview
         
 
