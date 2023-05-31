@@ -120,8 +120,6 @@ def search_list():
     product_info = driver.find_elements(By.CLASS_NAME, "spec_list")
 
 def coupang_search(): 
-    if coupang_number() == None:
-        return
     #와우 회원 할인 적용 되는 경우
     try:
         driver.implicitly_wait(4)
@@ -140,9 +138,7 @@ def coupang_search():
         driver.implicitly_wait(4)
         driver.switch_to.window(driver.window_handles[0])
 
-def gmarket_Search(): 
-    if gmarket_number() == None:
-        return
+def gmarket_search(): 
     try:
         driver.implicitly_wait(4)
         G_discountprice = driver.find_element(By.XPATH, '//*[@id="itemcase_basic"]/div/div[4]/span[3]/strong').text
@@ -161,10 +157,8 @@ def gmarket_Search():
         driver.switch_to.window(driver.window_handles[0])
 
 def auction_search(): 
-    if auction_number() == None:
-        return
     try:
-        driver.implicitly_wait(10)
+        driver.implicitly_wait(4)
         #쿠폰 적용(여러가지 쿠폰이 적용 될 수 있어서 수정 해야함)
         Auc_discountprice = driver.find_element(By.XPATH,'//*[@id="frmMain"]/div[4]/div[1]/div/strong').text
         print("쿠폰 적용 여부: O")
@@ -180,10 +174,8 @@ def auction_search():
         driver.switch_to.window(driver.window_handles[0])
 
 def ele_search(): 
-    if ele_number() == None:
-        return
     try:
-        driver.implicitly_wait(10)
+        driver.implicitly_wait(4)
         Ele_discountprice = driver.find_element(By.XPATH, '//*[@id="layBodyWrap"]/div/div[1]/div[2]/div/div[1]/div[2]/div[2]/div[3]/div/div/ul/li/dl[1]/dd/strong/span[1]').text
         print("쿠폰 적용 여부: O")
         print("할인 가격:" + Ele_discountprice)
@@ -191,14 +183,13 @@ def ele_search():
         driver.implicitly_wait(4)
         driver.switch_to.window(driver.window_handles[0])
     except NoSuchElementException:
-        driver.implicitly_wait(10)
+        driver.implicitly_wait(4)
         Ele_price = driver.find_element(By.CLASS_NAME, 'value').text                 
         print("쿠폰 적용 여부: x")
         print("실제 가격: " + Ele_price + "원") 
 
 def ele_number():
     try: 
-        driver.implicitly_wait(4)
         Ele_link = driver.find_element(By.XPATH, '//img[@alt="11번가"]')
         Ele_link.click()
         driver.implicitly_wait(1.5)
@@ -254,7 +245,6 @@ def auction_number():
     
 def coupang_number():
     try: 
-        driver.implicitly_wait(4)
         Coupang_link = driver.find_element(By.XPATH, '//img[@alt="쿠팡"]')
         Coupang_link.click()
         driver.implicitly_wait(1.5)
@@ -269,6 +259,28 @@ def coupang_number():
         driver.implicitly_wait(4)
         return Coupang_url
 
+def coupang():
+    c = coupang_number()
+    if c == None:
+        return
+    coupang_search()
+def auction():
+    a = auction_number()
+    if a == None:
+        return
+    auction_search()
+def gmarket():
+    g = gmarket_number()
+    if g == None:
+        return
+    gmarket_search()
+def ele():
+    e = ele_number()
+    if e == None:
+        return
+    ele_search()
+    
+    
 #1페이지            
 class PageOne(tk.Frame):
     def __init__(self, master):
@@ -278,7 +290,7 @@ class PageOne(tk.Frame):
             list_clear()
             
 
-
+        
         def Next():#다음 페이지로 넘어가는 함수
             if idx == -1:
                 msgbox.showinfo("알림", "제품을 선택해주세요")
@@ -286,21 +298,13 @@ class PageOne(tk.Frame):
                 #제품 선택 시 4사 마켓의 제품가격, 쿠폰 적용 여부, 실제 가격 확인
                 driver.get(product_link[idx])
                 driver.implicitly_wait(5)
-                ele_number()
+                ele()
                 driver.implicitly_wait(10)
-                ele_search()
+                gmarket()
                 driver.implicitly_wait(10)
-                gmarket_number()
+                auction()
                 driver.implicitly_wait(10)
-                gmarket_Search()
-                driver.implicitly_wait(10)
-                auction_number()
-                driver.implicitly_wait(10)
-                auction_search()
-                driver.implicitly_wait(10)
-                coupang_number()
-                driver.implicitly_wait(10)
-                coupang_search()
+                coupang()
                 driver.implicitly_wait(10)
                 master.switch_frame(PageTwo)
 
