@@ -1,11 +1,11 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from bs4 import BeautifulSoup
 from tkinter import *
-from tkinter.simpledialog import askstring
 from io import BytesIO
 from PIL import Image, ImageTk
 from urllib.request import urlopen
@@ -14,6 +14,7 @@ import tkinter.ttk
 import tkinter.messagebox as msgbox
 import tkinter.font
 import time
+import pyperclip
 import re
 
 
@@ -39,24 +40,58 @@ class App(tk.Tk):
 eID = ''
 ePW = ''
 login = 0
+
+def create_window():
+    newWindow = Toplevel(app)
+    newWindow.title("11st login")
+    tk.Label(newWindow, text = "ID : ").grid(row = 0, column = 0, padx = 10, pady = 10)
+    tk.Label(newWindow, text = "PW : ").grid(row = 1, column = 0, padx = 10, pady = 10)
+    eid = tk.Entry(newWindow)
+    eid.grid(row = 0, column = 1, padx = 10, pady = 10)
+    epw = tk.Entry(newWindow)
+    epw.grid(row = 1, column = 1, padx = 10, pady = 10)
+    def quit(newWindow):
+        newWindow.destroy()
+    def command():
+        global eID, ePW
+        eID = eid.get()
+        ePW = epw.get()
+        login_eleven()
+        quit(newWindow)
+    tk.Button(newWindow, text = "Login", command = command).grid(row = 2, column = 1, padx = 10, pady = 10)
+
 def login_eleven():
     global eID, ePW, login
+    pyperclip.copy(eID)
     driver.get('https://www.11st.co.kr')
+    driver.implicitly_wait(1)
+    ActionChains(driver).key_down(Keys.CONTROL).send_keys('d').perform()
+    # 11번가 즐겨찾기
+    driver.implicitly_wait(1)
     button = driver.find_element(By.XPATH,'//*[@id="gnb"]/div/div[3]/div/div[2]/div[1]/a[1]')
     button.click()
-    id = driver.find_element(By.ID, 'memID')
-    pw = driver.find_element(By.ID, 'memPwd')
+    driver.implicitly_wait(1)
+    driver.find_element(By.XPATH, '/html/body/div[1]/div[2]/div[2]/form/fieldset/div[5]/div[1]/label').click()
+    driver.implicitly_wait(1)
+    id = driver.find_element(By.ID, 'memId')
     id.click()
-    id.send_keys(eID)
+    driver.implicitly_wait(1)
+    ActionChains(driver).key_down(Keys.CONTROL).send_keys('v').key_up(Keys.CONTROL).perform()
+    #아이디 send_keys 불가능, pyperclip을 통한 북사/붙여넣기로 해결
+    driver.implicitly_wait(1)
+    pw = driver.find_element(By.ID, 'memPwd')
     pw.click()
     pw.send_keys(ePW)
-    if driver.find_element(By.CLASS_NAME, 'c-error__message'):
-        login = 0
-        driver.get("https://danawa.com")
-    else:
-        driver.find_element(By.ID, 'btnSpLoginNotToday').click
+    driver.implicitly_wait(1)
+    driver.find_element(By.XPATH, '/html/body/div[1]/div[2]/div[2]/form/fieldset/div[4]/button').click()
+    driver.implicitly_wait(1)
+    if driver.find_element(By.CLASS_NAME,'c-close-today'):
         login = 1
-        driver.get("https://danawa.com")
+    else:
+        login = 0
+    driver.get("https://danawa.com")
+    print(login)
+
 
 
 #검색페이지
@@ -66,13 +101,17 @@ class StartPage(tk.Frame):
         logo = tk.PhotoImage(file="logo.png")
         icon = tk.PhotoImage(file="icon.png")
         font = tk.font.Font(family="맑은 고딕", size=15)
+        def get_id():
+            create_window()
+            if login == 1:
+                ebtn.config(text="login complete", state="disabled")
         def Enter(event):
             Search()
         def Search(): #버튼 누를시 실행할 함수
             if login != 1:
                 go = tk.messagebox.askyesno("알림","11번가 로그인이 완료되지 않았습니다."+"\n"+"계속 진행하시겠습니까?")
-            if go == False:
-                exit()
+                if go == False:
+                    exit()
             search_word = str(txt.get())
             if(search_word != ""):
                 progressbar.config(value=10)
@@ -97,13 +136,6 @@ class StartPage(tk.Frame):
                 master.switch_frame(PageOne) #페이지 전환
             else:
                 msgbox.showinfo("알림", "검색어를 입력해주세요")
-        def get_id():
-            eID = askstring(title="11번가 아이디 입력", prompt="11번가 아이디를 입력해주세요")
-            if eID != '':
-                ePW = askstring(title="11번가 비밀번호", prompt="11번가 비밀번호를 입력해주세요")
-            login_eleven()
-            if login != 1:
-               msgbox.showinfo("알림", "로그인 정보가 틀립니다. 다시 시도해주세요")
         tk.Frame.__init__(self, master)
         tk.Frame.configure(self,bg="white")
         label = tk.Label(self, image=logo, bd=0, bg="white")
@@ -115,10 +147,11 @@ class StartPage(tk.Frame):
         btn = tk.Button(self, image=icon, bd=0, bg="white", relief="solid", repeatinterval=1000, cursor="hand2", command=Search)
         btn.image = icon #가비지 컬렉터 삭제 방지
         btn.pack(side="right", anchor="n", padx=5)
-        tk.Button(self, text="11st login", bg="white", command=get_id).place(x=25, y=685)
+        ebtn = tk.Button(self, text="11st login", bg="white", command=get_id)
+        ebtn.place(x=25, y=685)
         progressbar = tkinter.ttk.Progressbar(self, mode="determinate", maximum=100, value=0)
         progressbar.place(x=460, y=685, width=800, height=25)
-        msgbox.showinfo("알림", "11번가 쿠폰 정보를 불러오기 위해서는 로그인이 필요합니다. 하단의 버튼을 눌러 로그인 정보를 입력해주세요")
+        msgbox.showinfo("알림", "11번가 쿠폰 정보를 불러오기 위해서는 로그인이 필요합니다."+"\n"+"하단의 버튼을 눌러 로그인 정보를 입력해주세요")
 
 
 product_name=[]
@@ -326,7 +359,7 @@ def eleven_search():
         if link.text == '쿠폰받기': 
             link.click()
             driver.implicitly_wait(1)
-            id = driver.find_element(By.ID, 'memID')
+            id = driver.find_element(By.ID, 'memId')
             pw = driver.find_element(By.ID, 'memPwd')
             id.click()
             id.send_keys(eID)
@@ -515,10 +548,6 @@ if __name__ == "__main__":
     chrome_options.add_experimental_option("detach", True)
     #chrome_options.add_argument('headless')
     driver = webdriver.Chrome(options=chrome_options)
-    # 11번가 즐겨찾기
-    driver.get('https://www.11st.co.kr')
-    webdriver.ActionChains(driver).key_down(Keys.CONTROL).send_keys('d').perform()
-    driver.implicitly_wait(1)
     driver.get("https://danawa.com")
     webdriver.ActionChains(driver).key_down(Keys.CONTROL).send_keys('d').perform()
     app = App()
