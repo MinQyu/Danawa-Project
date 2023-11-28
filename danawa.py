@@ -1,10 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.support.ui import WebDriverWait
 from bs4 import BeautifulSoup
 from tkinter import *
 from io import BytesIO
@@ -17,7 +14,6 @@ import tkinter.ttk
 import tkinter.messagebox as msgbox
 import tkinter.font
 import time
-import pyperclip
 import re
 
 
@@ -454,10 +450,10 @@ class PageOne(tk.Frame):
                              relief="groove", highlightbackground="lightgreen", highlightcolor="lightgreen", highlightthickness=2, activestyle="none",
                              font=('맑은 고딕',12),yscrollcommand=scrollbar.set)
         if len(product_name)<40: #검색 결과가 40개 미만인 경우
-            for i in range(len(product_name)):
+            for i in range(len(product_name)-1):
                 Listbox.insert(i,product_name[i])
         else:
-            for i in range(40):
+            for i in range(39):
                 Listbox.insert(i,product_name[i])
         Listbox.pack(side="right", fill=BOTH, padx=5, pady=45)
         tk.Button(self, text="Back", bg="white", command=Back).place(x=25, y=685)
