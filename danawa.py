@@ -47,75 +47,14 @@ login = 0
 
 def create_window():
     newWindow = Toplevel(app)
-    newWindow.title("11st login")
-    tk.Label(newWindow, text = "ID : ").grid(row = 0, column = 0, padx = 10, pady = 10)
-    tk.Label(newWindow, text = "PW : ").grid(row = 1, column = 0, padx = 10, pady = 10)
-    eid = tk.Entry(newWindow, text = eID)
-    eid.grid(row = 0, column = 1, padx = 10, pady = 10)
-    epw = tk.Entry(newWindow, text = ePW)
-    epw.grid(row = 1, column = 1, padx = 10, pady = 10)
+    newWindow.title("도움말")
+    tk.Label(newWindow, text = "▶ 다나와를 기반으로 쿠팡, G마켓, 옥션, 11번가의 판매 가격과 판매 페이지를 찾아주는 크롤러 프로그램입니다.", anchor="w", font=('맑은 고딕', 11)).grid(row = 0, column = 0, sticky="w", padx = 10, pady = 10)
+    tk.Label(newWindow, text = "▶ 다나와에서 취급하는 모든 제품을 검색 가능하나, 되도록 전자제품 검색을 권장합니다.", anchor="w", font=('맑은 고딕', 11)).grid(row = 1, column = 0, sticky="w", padx = 10, pady = 10)
+    tk.Label(newWindow, text = "▶ 식품, 잡화 등의 상품은 오픈마켓 4사의 판매가가 최저가가 아닐 확률이 높습니다.", anchor="w", font=('맑은 고딕', 11)).grid(row = 2, column = 0, sticky="w", padx = 10, pady = 10)
     def quit(newWindow):
         newWindow.destroy()
-    def command():
-        global eID, ePW
-        eID = eid.get()
-        ePW = epw.get()
-        login_eleven()
-        if login == 1:
-            msgbox.showinfo("알림", "로그인 성공")
-            quit(newWindow)
-            driver.get("https://danawa.com")
-        else:
-            msgbox.showinfo("알림", "로그인 실패\n다시 입력해주세요")
-            return          
-    tk.Button(newWindow, text = "Login", command = command).grid(row = 2, column = 3, padx = 10, pady = 10)
-    msg = tk.Label(newWindow)
-    msg.grid(row = 2, column = 1, pady = 10)
 
-
-def login_eleven():
-    global eID, ePW, login, cookies
-    driver.get('https://www.11st.co.kr')
-    driver.implicitly_wait(3)
-    ActionChains(driver).key_down(Keys.CONTROL).send_keys('d').perform()
-    # 11번가 즐겨찾기
-    driver.implicitly_wait(3)
-    button = driver.find_element(By.XPATH,'//*[@id="gnb"]/div/div[3]/div/div[2]/div[1]/a[1]')
-    button.click()
-    driver.implicitly_wait(3)
-    check = driver.find_element(By.XPATH,'/html/body/div[1]/div[2]/div[2]/form/fieldset/div[5]/div')
-    check.click() #로그인 상태 유지 버튼
-    driver.implicitly_wait(3)  
-    pyperclip.copy(eID)
-    driver.implicitly_wait(3)
-    id = driver.find_element(By.ID, 'memId')
-    id.click()
-    driver.implicitly_wait(3)
-    ActionChains(driver).key_down(Keys.CONTROL).send_keys('v').key_up(Keys.CONTROL).perform()
-    #아이디 send_keys 불가능, pyperclip을 통한 북사/붙여넣기로 해결
-    driver.implicitly_wait(3)
-    pw = driver.find_element(By.ID, 'memPwd')
-    pw.click()
-    pw.send_keys(ePW)
-    driver.implicitly_wait(3)
-    driver.find_element(By.CLASS_NAME, 'c-buttons').click()
-    time.sleep(1.5)
-    driver.get('https://www.11st.co.kr')
-    driver.implicitly_wait(2)
-    '''
-    login_chk = driver.find_element(By.CLASS_NAME, 'user').is_displayed()
-    if login_chk:
-        login = 1
-    else:
-        login = 0
-    driver.implicitly_wait(2)
-    print(login)
-    '''
-    try:
-        element = driver.find_element(By.CLASS_NAME, 'user')
-        login = 1
-    except NoSuchElementException:
-        login = 0
+    
 
 #검색페이지
 class StartPage(tk.Frame):
@@ -124,15 +63,11 @@ class StartPage(tk.Frame):
         logo = tk.PhotoImage(file="logo.png")
         icon = tk.PhotoImage(file="icon.png")
         font = tk.font.Font(family="맑은 고딕", size=15)
-        def get_id():
+        def help():
             create_window()
         def Enter(event):
             Search()
         def Search(): #버튼 누를시 실행할 함수
-            if login != 1:
-                go = tk.messagebox.askyesno("알림","11번가 로그인이 완료되지 않았습니다.\n계속 진행하시겠습니까?")
-                if go == False:
-                    return
             search_word = str(txt.get())
             if(search_word != ""):
                 progressbar.config(value=10)
@@ -165,12 +100,12 @@ class StartPage(tk.Frame):
         txt = tk.Entry(self, relief="groove", insertbackground="green", highlightthickness=2, highlightcolor="lightgreen", font=font)
         txt.bind("<Return>",Enter)
         txt.pack(expand=1, side="left", anchor="n", fill=X, padx=5)
-        label_msg = tk.Label(self, relief="groove", anchor="w", bd=1, bg="white", text="11번가 프로모션 정보를 불러오기 위해서는 로그인이 필요합니다. 하단의 버튼을 눌러 로그인 정보를 입력해주세요", font=('맑은 고딕', 13))
+        label_msg = tk.Label(self, relief="groove", anchor="w", bd=1, bg="white", text="상단의 검색창에 검색어를 입력 후 Enter키를 눌러주세요", font=('맑은 고딕', 13))
         label_msg.place(x=25, y=645, width=1235)
         btn = tk.Button(self, image=icon, bd=0, bg="white", relief="solid", repeatinterval=1000, cursor="hand2", command=Search)
         btn.image = icon #가비지 컬렉터 삭제 방지
         btn.pack(side="right", anchor="n", padx=5)
-        ebtn = tk.Button(self, text="11st login", bg="white", command=get_id)
+        ebtn = tk.Button(self, text="help", bg="white", command=help)
         ebtn.place(x=25, y=685)
         progressbar = tkinter.ttk.Progressbar(self, mode="determinate", maximum=100, value=0)
         progressbar.place(x=460, y=685, width=800, height=25)
@@ -218,9 +153,10 @@ def search_list():
             product_name.append(name)
             product_link.append(prod_link)
             image_link.append("https:"+img_link)
-            product_info.append(prod_info)
+            str = re.sub(r'\s+', ' ', prod_info)
+            product_info.append(str)
             tmp = name
-    
+
 coupang_price = '/'
 gmarket_price = '/'
 auction_price = '/'
@@ -229,9 +165,14 @@ c_coupon = '/'
 g_coupon = '/'
 a_coupon = '/'
 e_coupon = '/'
+c_link = ''
+g_link = ''
+a_link = ''
+e_link = ''
 
 def price_clear():
-    global coupang_price, gmarket_price, auction_price, eleven_price, c_coupon, g_coupon, a_coupon, e_coupon 
+    global coupang_price, gmarket_price, auction_price, eleven_price, c_coupon, g_coupon, a_coupon, e_coupon
+    global c_link, g_link, a_link, e_link
     coupang_price = '/'
     gmarket_price = '/'
     auction_price = '/'
@@ -240,9 +181,13 @@ def price_clear():
     g_coupon = '/'
     a_coupon = '/'
     e_coupon = '/'
+    c_link = ''
+    g_link = ''
+    a_link = ''
+    e_link = ''
 
 def coupang_search():
-    global coupang_price, c_coupon
+    global coupang_price, c_coupon, c_link
     try:
         coupang_link = driver.find_element(By.XPATH, '//img[@alt="쿠팡"]')
         coupang_link.click()
@@ -254,8 +199,9 @@ def coupang_search():
         return
     if check_dc("coupang"):
         try:
-            wow = driver.find_element(By.XPATH,'//*[@id="contents"]/div/div[1]/div[3]/div[5]/div[1]/div/div[5]/div/span[2]/b')
-            c_coupon = "와우 회원가 :"+wow.text
+            wow = driver.find_element(By.XPATH,'//*[@id="contents"]/div/div[1]/div[3]/div[5]/div[1]/div/div[5]/div/span[2]/b').text
+            tmp = wow[0:wow.find("에 구매")]
+            c_coupon = "와우 회원가: "+tmp
         except:
             c_coupon = "쿠폰 적용"
         coupang_price = driver.find_element(By.XPATH, '//*[@id="contents"]/div/div[1]/div[3]/div[5]/div[1]/div/div[3]/span[1]/strong').text
@@ -263,6 +209,8 @@ def coupang_search():
         price = driver.find_element(By.CLASS_NAME, 'total-price').text
         c_coupon = "쿠폰 미적용"
         coupang_price = price
+    tmp = driver.current_url
+    c_link = tmp[0:tmp.find("?itemId")]
     driver.close()
     driver.implicitly_wait(1)
     driver.switch_to.window(driver.window_handles[0])
@@ -270,7 +218,7 @@ def coupang_search():
 
 
 def gmarket_search():
-    global gmarket_price, g_coupon
+    global gmarket_price, g_coupon, g_link
     discount=0
     try:
         gmarket_link = driver.find_element(By.XPATH, '//img[@alt="G마켓"]')
@@ -283,7 +231,7 @@ def gmarket_search():
     price_str = driver.find_element(By.CLASS_NAME, 'price_real').text
     price_int = int(re.sub(r'[^0-9]', '', price_str))
     if check_dc("gmarket"):
-        g_coupon = "쿠폰 적용 가능"
+        g_coupon = "쿠폰 적용"
         tmp = driver.find_element(By.CLASS_NAME, 'text__ellipsis').text
         if tmp.find('%'):
             dc_percentage = int(re.sub(r'[^0-9]', '', tmp))
@@ -295,7 +243,10 @@ def gmarket_search():
             driver.implicitly_wait(1)
             link.click()
             driver.implicitly_wait(2)
-            tmp_str = driver.find_element(By.CSS_SELECTOR, 'button.button__detail.js-button_detail').text
+            try:
+                tmp_str = driver.find_element(By.CSS_SELECTOR, 'button.button__detail.js-button_detail').text
+            except:
+                tmp_str = driver.find_element(By.CLASS_NAME, 'button__detail js-button_detail').text
             driver.implicitly_wait(2)
             tmp_str.strip()
             tmp_str = tmp_str[tmp_str.find("최대")+3:]
@@ -324,14 +275,15 @@ def gmarket_search():
     else: 
         gmarket_price = price_str
         g_coupon = "쿠폰 미적용"
-    driver.implicitly_wait(1)
+    tmp = driver.current_url
+    g_link = tmp[0:tmp.find("&GoodsSale")]
     driver.close()
     driver.implicitly_wait(1)
     driver.switch_to.window(driver.window_handles[0])
     driver.implicitly_wait(1)
 
 def auction_search():
-    global auction_price, a_coupon
+    global auction_price, a_coupon, a_link
     discount=0
     try:
         auction_link = driver.find_element(By.XPATH, '//img[@alt="옥션"]')
@@ -344,11 +296,11 @@ def auction_search():
     price_str = driver.find_element(By.CLASS_NAME, 'price_real').text
     price_int = int(re.sub(r'[^0-9]', '', price_str))
     if check_dc("auction"):
-        a_coupon = "쿠폰 적용 가능"
-        tmp = driver.find_element(By.CLASS_NAME, 'text__ellipsis').text
+        a_coupon = "쿠폰 적용"
+        tmp = driver.find_element(By.CLASS_NAME, 'text__coupon').text
         if tmp.find('%'):
             dc_percentage = int(re.sub(r'[^0-9]', '', tmp))
-            link = driver.find_element(By.CLASS_NAME, 'box__coupon-inner')
+            link = driver.find_element(By.CLASS_NAME, 'box__coupon-wrap')
             link.click()
             driver.implicitly_wait(1)
             tmp_str = driver.find_element(By.CSS_SELECTOR, 'button.button__detail.js-button_detail').text
@@ -370,7 +322,8 @@ def auction_search():
     else: 
         auction_price = price_str
         a_coupon = "쿠폰 미적용"
-    driver.implicitly_wait(1)
+    tmp = driver.current_url
+    a_link = "http://itempage3.auction.co.kr/DetailView.aspx?itemno="+tmp[tmp.find("No=")+3:tmp.find("&frm")]
     driver.close()
     driver.implicitly_wait(1)
     driver.switch_to.window(driver.window_handles[0])
@@ -378,9 +331,7 @@ def auction_search():
 
 
 def eleven_search():
-    global eleven_price, e_coupon
-    cp_list = []
-    discount=0
+    global eleven_price, e_coupon, e_link
     try:
         eleven_link = driver.find_element(By.XPATH, '//img[@alt="11번가"]')
         eleven_link.click()
@@ -389,32 +340,44 @@ def eleven_search():
         eleven_price = "판매처가 존재하지 않습니다"
         print("제품이 존재하지 않습니다.")
         return
-    #driver.find_element(By.ID, 'loadingStop').click()
-    E_link = driver.current_url
-    Eleven_link = "https://www.11st.co.kr/products/"+E_link[E_link.find("link_pcode=")+11:E_link.find("&package")]
-    print(Eleven_link)
+    try:
+        driver.find_element(By.ID, 'loadingStop').click()
+        E_link = driver.current_url
+        Eleven_link = "https://www.11st.co.kr/products/"+E_link[E_link.find("link_pcode=")+11:E_link.find("&package")]
+    except:
+        driver.implicitly_wait(1)
+        E_link = driver.current_url
+        Eleven_link = E_link[0:E_link.find("?service")]
     driver.get("https://www.11st.co.kr")
     driver.implicitly_wait(1)
     driver.switch_to.window(driver.window_handles[1])
     driver.get(Eleven_link)
     driver.implicitly_wait(3)
-    price_str = driver.find_element(By.XPATH, '//*[@id="finalDscPrcArea"]/dd[2]/strong/span[1]').text
-    driver.implicitly_wait(3)
+    try:
+        price_str = driver.find_element(By.XPATH, '//*[@id="finalDscPrcArea"]/dd[2]/strong/span[1]').text
+        driver.implicitly_wait(1)
+    except:
+        price_str = driver.find_element(By.XPATH, '//*[@id="finalDscPrcArea"]/dd/strong/span[1]').text
+        driver.implicitly_wait(1)
     element=driver.find_element(By.TAG_NAME,"html")
     element.send_keys(Keys.SPACE) #스크롤
     try:
         isCoupon = driver.find_element(By.ID, 'maxDiscountResult')
         e_coupon = '쿠폰 적용'
         price = driver.find_element(By.XPATH, '//*[@id="maxDiscountResult"]/dd[2]').text.strip()
+        if not(price.find(',')): 
+            price = driver.find_element(By.XPATH, '//*[@id="maxDiscountResult"]/dd[1]').text.strip()
+            if not(price.find(',')): price = driver.find_element(By.XPATH, '//*[@id="finalDscPrcArea"]/dd/strong/span[1]').text
         eleven_price = re.sub("\n", "", price)
     except:
         eleven_price = price_str
+    if eleven_price.find("원") < 0 : eleven_price+="원"
+    eleven_price = eleven_price[0:eleven_price.find("원")+1]
+    e_link = Eleven_link
     driver.close()
     driver.implicitly_wait(1)
     driver.switch_to.window(driver.window_handles[0])
     driver.implicitly_wait(1)
-
-
 
 
 def check_dc(market):
@@ -423,7 +386,7 @@ def check_dc(market):
     elif market == "gmarket":
         name = 'text__ellipsis'
     elif market == "auction":
-        name = 'text__ellipsis'
+        name = 'text__coupon'
     try:
         driver.find_element(By.CLASS_NAME, name)
         driver.implicitly_wait(2)
@@ -466,7 +429,7 @@ class PageOne(tk.Frame):
             global idx
             w = event.widget
             idx = int(w.curselection()[0])
-            label_info.config(text=re.sub(r"\s","",product_info[idx]))
+            label_info.config(text=product_info[idx])
             u = urlopen(image_link[idx])
             raw_data = u.read()
             u.close()
@@ -507,17 +470,33 @@ class PageOne(tk.Frame):
 
 class PageTwo(tk.Frame):
     def __init__(self, master):
-        global idx
+        global idx, c_link, g_link, a_link, e_link
         img_c = PhotoImage(file='coupang.png')
         img_g = PhotoImage(file='gmarket.png')
         img_a = PhotoImage(file='auction.png')
         img_e = PhotoImage(file='eleven.png')
-        def go_first(): #이전 페이지
+        def go_first(): #처음 페이지
             idx = -1
             price_clear()
             list_clear()
             master.switch_frame(StartPage)
             driver.get("https://danawa.com")
+            driver.minimize_window()
+        def link_open(l):
+            if l == 'c' and c_link!='':
+                driver.get(c_link)
+                driver.maximize_window()
+            elif l == 'g' and g_link!='':
+                driver.get(g_link)
+                driver.maximize_window()
+            elif l == 'a' and a_link!='':
+                driver.get(a_link)
+                driver.maximize_window()
+            elif l == 'e' and e_link!='':
+                driver.get(e_link)
+                driver.maximize_window()
+            else:
+                msgbox.showinfo("알림", "판매처가 존재하지 않습니다")
         tk.Frame.__init__(self, master)
         tk.Frame.configure(self,bg="white")
         label_img = tk.Label(self, bg="white")
@@ -563,6 +542,14 @@ class PageTwo(tk.Frame):
         label_e_price.place(x=750, y=610)        
         label_img.place(x=50, y=50)
         label_info.place(x=350, y=80)
+        button_c = tk.Button(self, text="구매링크", bg="white", command=lambda:link_open('c'))
+        button_g = tk.Button(self, text="구매링크", bg="white", command=lambda:link_open('g'))
+        button_a = tk.Button(self, text="구매링크", bg="white", command=lambda:link_open('a'))
+        button_e = tk.Button(self, text="구매링크", bg="white", command=lambda:link_open('e'))
+        button_c.place(x=1150, y=345)
+        button_g.place(x=1150, y=435)
+        button_a.place(x=1150, y=530)
+        button_e.place(x=1150, y=615)   
         tk.Label(self, text=product_name[idx], anchor = W, bg = "white", font=('맑은 고딕', 17, "bold")).place(x=30, y=15)
         button = tk.Button(self, text="first page", bg="white", command=go_first)
         button.place(x=25, y=685)
@@ -572,6 +559,7 @@ if __name__ == "__main__":
     subprocess.Popen(r'C:\Program Files\Google\Chrome\Application\chrome.exe --remote-debugging-port=9222 --user-data-dir="C:\chromeCookie"')
     chrome_options = Options()
     chrome_options.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
+    chrome_options.add_argument('window-size=1920x1080')
     #chrome_options.add_argument('headless')
     chrome_ver = chromedriver_autoinstaller.get_chrome_version().split('.')[0]
     try:
@@ -583,4 +571,18 @@ if __name__ == "__main__":
     driver.get("https://danawa.com")
     app = App()
     app.mainloop()
+
+
+'''
+#셀레니움 4.10.0 버전 이후
+if __name__ == "__main__":  
+    subprocess.Popen(r'C:\Program Files\Google\Chrome\Application\chrome.exe --remote-debugging-port=9222 --user-data-dir="C:\chromeCookie"')
+    chrome_options = Options()
+    chrome_options.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+    driver.implicitly_wait(1)
+    driver.get("https://danawa.com")
+    app = App()
+    app.mainloop()
+'''
 
