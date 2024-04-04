@@ -16,7 +16,6 @@ import tkinter.font
 import time
 import re
 
-
 class App(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
@@ -28,7 +27,6 @@ class App(tk.Tk):
         self.resizable(False, False)
         self._frame = None
         self.switch_frame(StartPage)
-
     def switch_frame(self, frame_class):
         new_frame = frame_class(self)
         if self._frame is not None:
@@ -36,10 +34,6 @@ class App(tk.Tk):
         self._frame = new_frame
         self._frame.pack(expand=1, fill=BOTH)
 
-eID = ''
-ePW = ''
-cookies = ''
-login = 0
 
 def create_window():
     newWindow = Toplevel(app)
@@ -50,11 +44,8 @@ def create_window():
     def quit(newWindow):
         newWindow.destroy()
 
-    
-
 #검색페이지
 class StartPage(tk.Frame):
-    global eID, ePW, login
     def __init__(self, master):
         logo = tk.PhotoImage(file="logo.png")
         icon = tk.PhotoImage(file="icon.png")
@@ -79,7 +70,7 @@ class StartPage(tk.Frame):
                 time.sleep(1)
                 progressbar.config(value=30)
                 progressbar.update()
-                scrolling()
+                scrolling(30)
                 progressbar.config(value=80)
                 progressbar.update()
                 search_list()
@@ -106,7 +97,6 @@ class StartPage(tk.Frame):
         progressbar = tkinter.ttk.Progressbar(self, mode="determinate", maximum=100, value=0)
         progressbar.place(x=460, y=685, width=800, height=25)
 
-
 product_name=[]
 product_info=[]
 product_link=[]
@@ -122,9 +112,9 @@ def list_clear():
     idx = -1
 
 
-def scrolling():
+def scrolling(n):
     element=driver.find_element(By.TAG_NAME,"html")
-    for i in range(30):
+    for i in range(n):
         element.send_keys(Keys.SPACE)
 
 
@@ -187,9 +177,7 @@ def coupang_search():
     try:
         coupang_link = driver.find_element(By.XPATH, '//img[@alt="쿠팡"]')
         coupang_link.click()
-        driver.implicitly_wait(1)
         driver.switch_to.window(driver.window_handles[1])
-        driver.implicitly_wait(5)
     except: 
         coupang_price = "판매처가 존재하지 않습니다."
         return
@@ -208,123 +196,165 @@ def coupang_search():
     tmp = driver.current_url
     c_link = tmp[0:tmp.find("?itemId")]
     driver.close()
-    driver.implicitly_wait(1)
     driver.switch_to.window(driver.window_handles[0])
-    driver.implicitly_wait(1)
-
+    
 
 def gmarket_search():
     global gmarket_price, g_coupon, g_link
+    class Coupon:
+        def __init__(self, dc, dup):
+            self.dc = dc
+            self.dup = dup
     discount=0
     try:
         gmarket_link = driver.find_element(By.XPATH, '//img[@alt="G마켓"]')
         gmarket_link.click()
         driver.switch_to.window(driver.window_handles[1])
-        driver.implicitly_wait(5)
     except:
         gmarket_price = "판매처가 존재하지 않습니다."
         return
-    price_str = driver.find_element(By.CLASS_NAME, 'price_real').text
-    price_int = int(re.sub(r'[^0-9]', '', price_str))
     if check_dc("gmarket"):
         g_coupon = "쿠폰 적용"
         tmp = driver.find_element(By.CLASS_NAME, 'text__ellipsis').text
-        if tmp.find('%'):
-            dc_percentage = int(re.sub(r'[^0-9]', '', tmp))
-            '''
-            element=driver.find_element(By.TAG_NAME,"html")
-            element.send_keys(Keys.SPACE)
-            '''
+        if tmp.find('%')!=-1:
+            price_str = driver.find_element(By.CLASS_NAME, 'price_original').text
+            price_int = int(re.sub(r'[^0-9]', '', price_str))
             link = driver.find_element(By.CLASS_NAME, 'box__coupon-inner')
-            driver.implicitly_wait(1)
             link.click()
-            driver.implicitly_wait(2)
-            try:
-                tmp_str = driver.find_element(By.CSS_SELECTOR, 'button.button__detail.js-button_detail').text
-            except:
-                tmp_str = driver.find_element(By.CLASS_NAME, 'button__detail js-button_detail').text
-            driver.implicitly_wait(2)
-            tmp_str.strip()
-            tmp_str = tmp_str[tmp_str.find("최대")+3:]
-            tmp_str = tmp_str[:tmp_str.find("원")+1]
-            won = re.sub(r'[^ㄱ-ㅣ가-힣\s]',"",tmp_str)
-            dc_max = int(re.sub(r'[^0-9]', '', tmp_str))
-            driver.implicitly_wait(1)
-            if won=="만원":
-                dc_max *= 10000
-            elif won=="천원":
-                dc_max *= 1000
-            if price_int*dc_percentage/100 > dc_max:
-                price_int -= dc_max
-            else:
-                price_int*=(100-dc_percentage)/100
+            coupon_list = driver.find_elements(By.CSS_SELECTOR, 'body > div.js__vipci.section__iframe-vipcoupon.section__iframe-vipcoupon--active > div > div.box__coupon-content > div > ul.list__coupon > li')
+            coupons = []
+            for item in coupon_list:
+                title_element = item.find_element(By.CLASS_NAME, 'box__coupon-title')
+                detail_element = item.find_element(By.CLASS_NAME, 'button__detail')
+                title_text = title_element.text.strip()
+                detail_text = detail_element.text.strip()
+                dc=0
+                percent_off=0
+                if (title_text.find('%')>0):
+                    percent_off = int(title_text[:title_text.find('%')])
+                    if (detail_text.find("최대")>0):
+                        dc_max = get_discount(detail_text)
+                        if price_int*percent_off/100 > dc_max:
+                            dc = dc_max
+                        else:
+                            dc = round(price_int*percent_off/100)
+                    else:
+                        dc = round(price_int*percent_off/100)
+                else:
+                    dc = int(re.sub(r'[^0-9]', '', title_text))
+                    if(re.search(r'만원', title_text)):
+                        dc *= 10000
+                    else:
+                        dc *= 1000
+                dup = "중복할인" in title_text
+                coupon = Coupon(dc, dup)
+                coupons.append(coupon)
+            if len(coupons) == 1:
+                discount = coupons[0].dc
+            else:     
+                c_max = max((coupon for coupon in coupons if hasattr(coupon, 'dc') and not coupon.dup),
+                            default=Coupon(0,False), key=lambda x: getattr(x, 'dc', 0))
+                c_dup_max = max((coupon for coupon in coupons if hasattr(coupon, 'dc') and coupon.dup),
+                                default=Coupon(0,True), key=lambda x: getattr(x, 'dc', 0))
+                discount =  c_max.dc + c_dup_max.dc
         else:
-            won = re.sub(r'[^ㄱ-ㅣ가-힣\s]',"",tmp)
-            discount = int(re.sub(r'[^0-9]', '', tmp))
-            if won=="만원":
-                discount *= 10000
-            elif won=="천원":
-                discount *= 1000
-        price_int-=discount
+            price_str = driver.find_element(By.CLASS_NAME, 'price_real').text
+            price_int = int(re.sub(r'[^0-9]', '', price_str))
+            discount = get_discount(tmp)
+        price_int -= discount
         gmarket_price = format(price_int,',')+'원'
-        driver.implicitly_wait(1)
-    else: 
-        gmarket_price = price_str
+        
+    else:
+        gmarket_price = driver.find_element(By.CLASS_NAME, 'price_real').text
         g_coupon = "쿠폰 미적용"
     tmp = driver.current_url
     g_link = tmp[0:tmp.find("&GoodsSale")]
     driver.close()
-    driver.implicitly_wait(1)
     driver.switch_to.window(driver.window_handles[0])
-    driver.implicitly_wait(1)
+
+def get_discount(detail_text):
+    detail_text = detail_text[detail_text.find("최대")+3:]
+    detail_text = detail_text[:detail_text.find("원")+1]
+    won = re.sub(r'[^ㄱ-ㅣ가-힣\s]','',detail_text)
+    discount = int(re.sub(r'[^0-9]', '', detail_text))
+    if won=="만원":
+        discount *= 10000
+    elif won=="천원":
+        discount *= 1000
+    return discount
 
 def auction_search():
     global auction_price, a_coupon, a_link
+    class Coupon:
+        def __init__(self, dc, dup):
+            self.dc = dc
+            self.dup = dup
     discount=0
     try:
         auction_link = driver.find_element(By.XPATH, '//img[@alt="옥션"]')
         auction_link.click()
-        driver.implicitly_wait(5)
         driver.switch_to.window(driver.window_handles[1])
     except:
         auction_price = "판매처가 존재하지 않습니다."
         return
-    price_str = driver.find_element(By.CLASS_NAME, 'price_real').text
-    price_int = int(re.sub(r'[^0-9]', '', price_str))
     if check_dc("auction"):
         a_coupon = "쿠폰 적용"
         tmp = driver.find_element(By.CLASS_NAME, 'text__coupon').text
-        if tmp.find('%'):
-            dc_percentage = int(re.sub(r'[^0-9]', '', tmp))
-            link = driver.find_element(By.CLASS_NAME, 'box__coupon-wrap')
+        if tmp.find('%')!=-1:
+            price_str = driver.find_element(By.CLASS_NAME, 'price_original').text
+            price_int = int(re.sub(r'[^0-9]', '', price_str))
+            link = driver.find_element(By.CLASS_NAME, 'box__text-coupon')
             link.click()
-            driver.implicitly_wait(1)
-            tmp_str = driver.find_element(By.CSS_SELECTOR, 'button.button__detail.js-button_detail').text
-            tmp_str.strip()
-            tmp_str = tmp_str[tmp_str.find("최대")+3:]
-            tmp_str = tmp_str[:tmp_str.find("원")+1]
-            won = re.sub(r'[^ㄱ-ㅣ가-힣\s]',"",tmp_str)
-            dc_max = int(re.sub(r'[^0-9]', '', tmp_str))
-            if won=="만원":
-                dc_max *= 10000
-            elif won=="천원":
-                dc_max *= 1000
-            if price_int*dc_percentage/100 > dc_max:
-                price_int -= dc_max
-            else:
-                price_int*=(100-dc_percentage)/100
-        price_int-=discount
-        auction_price = format(price_int,',')+'원'
-    else: 
-        auction_price = price_str
+            coupon_list = driver.find_elements(By.CSS_SELECTOR, 'body > div.js__vipci.section__iframe-vipcoupon.section__iframe-vipcoupon--active > div > div.box__coupon-content > div > ul.list__coupon > li')
+            coupons = []
+            for item in coupon_list:
+                title_element = item.find_element(By.CLASS_NAME, 'box__coupon-title')
+                detail_element = item.find_element(By.CLASS_NAME, 'button__detail')
+                title_text = title_element.text.strip()
+                detail_text = detail_element.text.strip()
+                dc=0
+                percent_off=0
+                if (title_text.find('%')>0):
+                    percent_off = int(title_text[:title_text.find('%')])
+                    if (detail_text.find("최대")>0):
+                        dc_max = get_discount(detail_text)
+                        if price_int*percent_off/100 > dc_max:
+                            dc = dc_max
+                        else:
+                            dc = round(price_int*percent_off/100)
+                    else:
+                        dc = round(price_int*percent_off/100)
+                else:
+                    dc = int(re.sub(r'[^0-9]', '', title_text))
+                    if(re.search(r'만원', title_text)):
+                        dc *= 10000
+                    else:
+                        dc *= 1000
+                dup = "중복할인" in title_text
+                coupon = Coupon(dc, dup)
+                coupons.append(coupon)
+            if len(coupons) == 1:
+                discount = coupons[0].dc
+            else:     
+                c_max = max((coupon for coupon in coupons if hasattr(coupon, 'dc') and not coupon.dup),
+                            default=Coupon(0,False), key=lambda x: getattr(x, 'dc', 0))
+                c_dup_max = max((coupon for coupon in coupons if hasattr(coupon, 'dc') and coupon.dup),
+                                default=Coupon(0,True), key=lambda x: getattr(x, 'dc', 0))
+                discount =  c_max.dc + c_dup_max.dc
+        else:
+            price_str = driver.find_element(By.CLASS_NAME, 'price_real').text
+            price_int = int(re.sub(r'[^0-9]', '', price_str))
+            discount = get_discount(tmp)
+        price_int -= discount
+        auction_price = round(format(price_int,','))+'원'
+    else:
+        auction_price = driver.find_element(By.CLASS_NAME, 'price_real').text
         a_coupon = "쿠폰 미적용"
     tmp = driver.current_url
     a_link = "http://itempage3.auction.co.kr/DetailView.aspx?itemno="+tmp[tmp.find("No=")+3:tmp.find("&frm")]
     driver.close()
-    driver.implicitly_wait(1)
     driver.switch_to.window(driver.window_handles[0])
-    driver.implicitly_wait(1)
-
+    
 
 def eleven_search():
     global eleven_price, e_coupon, e_link
@@ -334,27 +364,29 @@ def eleven_search():
         driver.switch_to.window(driver.window_handles[1])
     except:
         eleven_price = "판매처가 존재하지 않습니다"
-        print("제품이 존재하지 않습니다.")
         return
     try:
         driver.find_element(By.ID, 'loadingStop').click()
         E_link = driver.current_url
         Eleven_link = "https://www.11st.co.kr/products/"+E_link[E_link.find("link_pcode=")+11:E_link.find("&package")]
     except:
-        driver.implicitly_wait(1)
+        
         E_link = driver.current_url
         Eleven_link = E_link[0:E_link.find("?service")]
     driver.get("https://www.11st.co.kr")
-    driver.implicitly_wait(1)
+    
     driver.switch_to.window(driver.window_handles[1])
     driver.get(Eleven_link)
-    driver.implicitly_wait(3)
+    
     try:
         price_str = driver.find_element(By.XPATH, '//*[@id="finalDscPrcArea"]/dd[2]/strong/span[1]').text
-        driver.implicitly_wait(1)
+        
     except:
-        price_str = driver.find_element(By.XPATH, '//*[@id="finalDscPrcArea"]/dd/strong/span[1]').text
-        driver.implicitly_wait(1)
+        try:
+            price_str = driver.find_element(By.XPATH, '//*[@id="finalDscPrcArea"]/dd/strong/span[1]').text
+        except:
+            price_str = driver.find_element(By.XPATH, '//*[@id="layBodyWrap"]/div/div[1]/div[2]/div/div[1]/div[2]/div[2]/div[3]/div/div/dl/div[2]/dd[2]/strong/span[1]').text
+        
     element=driver.find_element(By.TAG_NAME,"html")
     element.send_keys(Keys.SPACE) #스크롤
     try:
@@ -371,10 +403,9 @@ def eleven_search():
     eleven_price = eleven_price[0:eleven_price.find("원")+1]
     e_link = Eleven_link
     driver.close()
-    driver.implicitly_wait(1)
+    
     driver.switch_to.window(driver.window_handles[0])
-    driver.implicitly_wait(1)
-
+    
 
 def check_dc(market):
     if market == "coupang":
@@ -385,14 +416,13 @@ def check_dc(market):
         name = 'text__coupon'
     try:
         driver.find_element(By.CLASS_NAME, name)
-        driver.implicitly_wait(2)
+        
         return True
     except:
         return False
 
 #1페이지            
 class PageOne(tk.Frame):
-    global eID, ePW, login
     def __init__(self, master):
         def Back(): #이전 페이지
             driver.get("https://danawa.com")
@@ -407,19 +437,15 @@ class PageOne(tk.Frame):
                 progressbar.update()
                 driver.get(product_link[idx])
                 coupang_search()
-                driver.implicitly_wait(1)
                 progressbar.config(value=30)
                 progressbar.update()
                 gmarket_search()
-                driver.implicitly_wait(1)
                 progressbar.config(value=50)
                 progressbar.update()
                 auction_search()
-                driver.implicitly_wait(1)
                 progressbar.config(value=80)
                 progressbar.update()
                 eleven_search()
-                driver.implicitly_wait(1)
                 master.switch_frame(PageTwo) 
         def event_for_listbox(event): #리스트박스 항목 클릭시
             global idx
@@ -477,7 +503,6 @@ class PageTwo(tk.Frame):
             list_clear()
             master.switch_frame(StartPage)
             driver.get("https://danawa.com")
-            driver.minimize_window()
         def link_open(l):
             if l == 'c' and c_link!='':
                 driver.get(c_link)
@@ -517,9 +542,9 @@ class PageTwo(tk.Frame):
         label_a.image = img_a
         label_e.image = img_e
         label_c.place(x=60, y=340)
-        label_g.place(x=60, y=430)
-        label_a.place(x=60, y=525)
-        label_e.place(x=60, y=610)
+        label_g.place(x=60, y=425)
+        label_a.place(x=60, y=520)
+        label_e.place(x=60, y=600)
         label_c_coupon = tk.Label(self, bg="white", text=c_coupon, height=1, width=35, highlightthickness=2, highlightbackground="lightgreen", relief="groove", font=('맑은 고딕', 13))
         label_c_price = tk.Label(self, bg="white", text=coupang_price, height=1, width=35, highlightthickness=2, highlightbackground="lightgreen", relief="groove", font=('맑은 고딕', 13))
         label_g_coupon = tk.Label(self, bg="white", text=g_coupon, height=1, width=35, highlightthickness=2, highlightbackground="lightgreen", relief="groove", font=('맑은 고딕', 13))
@@ -532,8 +557,8 @@ class PageTwo(tk.Frame):
         label_c_price.place(x=750, y=340)
         label_g_coupon.place(x=350, y=430)
         label_g_price.place(x=750, y=430)
-        label_a_coupon.place(x=350, y=525)
-        label_a_price.place(x=750, y=525)
+        label_a_coupon.place(x=350, y=520)
+        label_a_price.place(x=750, y=520)
         label_e_coupon.place(x=350, y=610)
         label_e_price.place(x=750, y=610)        
         label_img.place(x=50, y=50)
@@ -542,10 +567,10 @@ class PageTwo(tk.Frame):
         button_g = tk.Button(self, text="구매링크", bg="white", command=lambda:link_open('g'))
         button_a = tk.Button(self, text="구매링크", bg="white", command=lambda:link_open('a'))
         button_e = tk.Button(self, text="구매링크", bg="white", command=lambda:link_open('e'))
-        button_c.place(x=1150, y=345)
-        button_g.place(x=1150, y=435)
-        button_a.place(x=1150, y=530)
-        button_e.place(x=1150, y=615)   
+        button_c.place(x=1150, y=340)
+        button_g.place(x=1150, y=430)
+        button_a.place(x=1150, y=520)
+        button_e.place(x=1150, y=610)   
         tk.Label(self, text=product_name[idx], anchor = W, bg = "white", font=('맑은 고딕', 17, "bold")).place(x=30, y=15)
         button = tk.Button(self, text="first page", bg="white", command=go_first)
         button.place(x=25, y=685)
@@ -556,14 +581,10 @@ if __name__ == "__main__":
     chrome_options = Options()
     chrome_options.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
     chrome_options.add_argument('window-size=1920x1080')
-    #chrome_options.add_argument('headless')
+    chrome_options.add_argument('headless')
     chrome_ver = chromedriver_autoinstaller.get_chrome_version().split('.')[0]
-    try:
-        driver = webdriver.Chrome(f'./{chrome_ver}/chromedriver.exe', options=chrome_options)
-    except:
-        chromedriver_autoinstaller.install(True)
-        driver = webdriver.Chrome(f'./{chrome_ver}/chromedriver.exe', options=chrome_options)
-    driver.implicitly_wait(1)
+    driver = webdriver.Chrome(f'./123/chromedriver.exe', options=chrome_options)
+    driver.implicitly_wait(5)
     driver.get("https://danawa.com")
     app = App()
     app.mainloop()
@@ -576,9 +597,8 @@ if __name__ == "__main__":
     chrome_options = Options()
     chrome_options.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
-    driver.implicitly_wait(1)
+    
     driver.get("https://danawa.com")
     app = App()
     app.mainloop()
 '''
-
