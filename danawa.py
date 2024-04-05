@@ -84,7 +84,7 @@ class StartPage(tk.Frame):
         label = tk.Label(self, image=logo, bd=0, bg="white")
         label.image = logo #가비지 컬렉터 삭제 방지
         label.pack(fill=X, pady=10)
-        txt = tk.Entry(self, relief="groove", insertbackground="green", highlightthickness=2, highlightcolor="lightgreen", font=font, show="검색어 입력 후 Enter키를 눌러주세요")
+        txt = tk.Entry(self, relief="groove", insertbackground="green", highlightthickness=2, highlightcolor="lightgreen", font=font)
         txt.bind("<Return>",Enter)
         txt.pack(expand=1, side="left", anchor="n", fill=X, padx=5)
         label_msg = tk.Label(self, relief="groove", anchor="w", bd=1, bg="white", text="help 버튼을 눌러 도움말을 확인하실 수 있습니다", font=('맑은 고딕', 13))
