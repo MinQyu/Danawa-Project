@@ -84,10 +84,10 @@ class StartPage(tk.Frame):
         label = tk.Label(self, image=logo, bd=0, bg="white")
         label.image = logo #가비지 컬렉터 삭제 방지
         label.pack(fill=X, pady=10)
-        txt = tk.Entry(self, relief="groove", insertbackground="green", highlightthickness=2, highlightcolor="lightgreen", font=font)
+        txt = tk.Entry(self, relief="groove", insertbackground="green", highlightthickness=2, highlightcolor="lightgreen", font=font, show="검색어 입력 후 Enter키를 눌러주세요")
         txt.bind("<Return>",Enter)
         txt.pack(expand=1, side="left", anchor="n", fill=X, padx=5)
-        label_msg = tk.Label(self, relief="groove", anchor="w", bd=1, bg="white", text="상단의 검색창에 검색어를 입력 후 Enter키를 눌러주세요", font=('맑은 고딕', 13))
+        label_msg = tk.Label(self, relief="groove", anchor="w", bd=1, bg="white", text="help 버튼을 눌러 도움말을 확인하실 수 있습니다", font=('맑은 고딕', 13))
         label_msg.place(x=25, y=645, width=1235)
         btn = tk.Button(self, image=icon, bd=0, bg="white", relief="solid", repeatinterval=1000, cursor="hand2", command=Search)
         btn.image = icon #가비지 컬렉터 삭제 방지
@@ -346,7 +346,7 @@ def auction_search():
             price_int = int(re.sub(r'[^0-9]', '', price_str))
             discount = get_discount(tmp)
         price_int -= discount
-        auction_price = round(format(price_int,','))+'원'
+        auction_price = format(price_int,',')+'원'
     else:
         auction_price = driver.find_element(By.CLASS_NAME, 'price_real').text
         a_coupon = "쿠폰 미적용"
